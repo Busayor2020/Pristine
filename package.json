@@ -12,10 +12,12 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "pnpm run lint:eslint && pnpm run lint:format",
+    "lint": "pnpm run lint:eslint && pnpm run lint:format && pnpm run check:em-dash && pnpm run check:hex",
     "lint:eslint": "eslint .",
     "lint:format": "prettier --check .",
     "lint:fix": "eslint . --fix && prettier --write .",
+    "check:em-dash": "node tools/checks/no-em-dash.mjs",
+    "check:hex": "node tools/checks/no-stray-hex.mjs",
     "dev": "pnpm --filter @pristine/web run dev",
     "clean": "node tools/checks/clean.mjs"
   },
