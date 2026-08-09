@@ -1,0 +1,49 @@
+/*
+ * Application baseline.
+ *
+ * Both imports come from @pristine/tokens: the font faces and the generated
+ * custom properties. Nothing below sets a raw colour or size, only token
+ * references, which is what keeps the palette a one-file change.
+ */
+@import '@pristine/tokens/fonts.css';
+@import '@pristine/tokens/tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--pr-color-surface-0);
+  color: var(--pr-color-text-primary);
+  font-family: var(--pr-font-family-sans);
+  font-size: var(--pr-font-size-md);
+  font-weight: var(--pr-font-weight-regular);
+  line-height: var(--pr-line-height-normal);
+  letter-spacing: var(--pr-letter-spacing-tight);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Sizes, durations and byte counts must not reflow while they update. */
+.pr-numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
