@@ -1,0 +1,8 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'experiments'
+# esbuild resolves its platform binary in a postinstall. Vite and Vitest both
+# need it, so the script is allowed to run.
+allowBuilds:
+  esbuild: true

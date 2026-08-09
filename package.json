@@ -1,0 +1,32 @@
+{
+  "name": "pristine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.21.0",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter \"./packages/**\" run build && pnpm --filter @pristine/web run build",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "pnpm run lint:eslint && pnpm run lint:format",
+    "lint:eslint": "eslint .",
+    "lint:format": "prettier --check .",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "dev": "pnpm --filter @pristine/web run dev",
+    "clean": "node tools/checks/clean.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.2",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1",
+    "vitest": "^2.1.8"
+  }
+}
