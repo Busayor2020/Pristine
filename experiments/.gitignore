@@ -1,0 +1,11 @@
+# Generated candidates and the reference render. Rebuilt by `pnpm exp generate`.
+candidates/
+
+# What WhatsApp handed back. Belongs to a specific device, account and moment,
+# and is too big to version. Record the conditions in results.md instead.
+returned/
+
+# Synthetic charts are reproducible from `pnpm exp synth`. Real photographs are
+# committed deliberately, so they are allowlisted below.
+fixtures/*.png
+!fixtures/.gitkeep

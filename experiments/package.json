@@ -5,12 +5,11 @@
   "type": "module",
   "scripts": {
     "build": "tsc -b",
-    "start": "node --experimental-strip-types src/cli.ts",
+    "start": "tsc -b && node dist/cli.js",
     "test": "vitest run"
   },
   "dependencies": {
-    "@pristine/encoder": "workspace:*",
-    "@pristine/tokens": "workspace:*"
+    "@pristine/encoder": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
