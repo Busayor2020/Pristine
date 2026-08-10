@@ -40,11 +40,13 @@ export function formatBytes(bytes: number, options: FormatBytesOptions = {}): st
 
   const { locale = 'en', unit } = options;
   const chosen: ByteUnit = unit ?? (bytes >= GB ? 'GB' : bytes >= MB ? 'MB' : 'KB');
-  const decimals = chosen === 'KB' ? 0 : 1;
 
   const formatted = new Intl.NumberFormat(locale, {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
+    // Up to one decimal, never a trailing zero. The design writes "412 MB" and
+    // "1.9 MB", not "412.0 MB": a decimal the value does not have reads as
+    // false precision on a storage figure.
+    minimumFractionDigits: 0,
+    maximumFractionDigits: chosen === 'KB' ? 0 : 1,
   }).format(bytes / DIVISOR[chosen]);
 
   return `${formatted} ${chosen}`;

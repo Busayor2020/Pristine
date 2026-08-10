@@ -253,6 +253,272 @@ body {
   width: 100%;
 }
 
+/* -------------------------------------------------------------- Library -- */
+
+.pr-appbar__trailing-button {
+  margin-inline: auto calc(var(--pr-space-5) * -1);
+  color: var(--pr-color-text-tertiary);
+}
+
+.pr-library__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--pr-space-5);
+  margin-top: var(--pr-space-8);
+  margin-bottom: var(--pr-space-5);
+}
+
+.pr-eyebrow--inline {
+  margin: 0;
+}
+
+.pr-library__count {
+  font-size: var(--pr-font-size-xs);
+  color: var(--pr-color-text-muted);
+}
+
+/* ---------------------------------------------------------- Empty states - */
+
+.pr-empty {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-inline: var(--pr-space-10);
+  text-align: center;
+}
+
+/* Four outlined cards standing in for media that is not there yet. */
+.pr-empty__art {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--pr-space-3);
+  margin-bottom: var(--pr-space-8);
+  opacity: 0.55;
+}
+
+.pr-empty__art span {
+  width: var(--pr-space-9);
+  height: var(--pr-space-10);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-default);
+  border-radius: var(--pr-radius-sm);
+}
+
+.pr-empty__art span:first-child {
+  border-color: var(--pr-color-border-strong);
+}
+
+.pr-empty__art span:last-child {
+  border-color: var(--pr-color-border-subtle);
+}
+
+.pr-empty__title {
+  margin: 0 0 var(--pr-space-4);
+  font-size: var(--pr-font-size-xl);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-tight);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-empty__body {
+  margin: 0;
+  font-size: var(--pr-font-size-sm);
+  line-height: var(--pr-line-height-normal);
+  color: var(--pr-color-text-muted);
+  text-wrap: pretty;
+}
+
+/* ------------------------------------------------------------- Settings -- */
+
+.pr-settings__version {
+  display: flex;
+  align-items: baseline;
+  gap: var(--pr-space-5);
+  margin-top: var(--pr-space-9);
+  padding-bottom: var(--pr-space-9);
+  /* Quiet: version numbers matter for support, not for browsing. */
+  opacity: 0.5;
+  font-size: var(--pr-font-size-xs);
+  color: var(--pr-color-text-muted);
+}
+
+/* ------------------------------------------------------------ Permission - */
+
+.pr-screen__scroll--inset {
+  padding-top: var(--pr-space-8);
+}
+
+.pr-permission__art {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--pr-space-2);
+  width: calc(var(--pr-space-10) * 3);
+  margin-bottom: var(--pr-space-9);
+}
+
+.pr-permission__art span {
+  aspect-ratio: 1;
+  border-radius: var(--pr-radius-sm);
+  background: var(--pr-color-surface-4);
+}
+
+.pr-permission__art .pr-permission__art--picked {
+  background: var(--pr-color-accent-base);
+}
+
+.pr-points {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-space-7);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pr-points__item {
+  display: flex;
+  gap: var(--pr-space-5);
+}
+
+.pr-points__icon {
+  flex: none;
+  display: flex;
+  padding-top: var(--pr-space-1);
+  color: var(--pr-color-accent-base);
+}
+
+.pr-points__text {
+  font-size: var(--pr-font-size-md);
+  line-height: var(--pr-line-height-normal);
+  color: var(--pr-color-text-secondary);
+}
+
+/* ----------------------------------------------------------- Split parts - */
+
+.pr-parts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pr-parts__item {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-space-5);
+  padding-block: var(--pr-space-5);
+  border-bottom: var(--pr-border-width-hairline) solid var(--pr-color-surface-3);
+}
+
+.pr-parts__number {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--pr-space-8);
+  height: var(--pr-space-8);
+  border-radius: var(--pr-radius-sm);
+  background: var(--pr-color-surface-4);
+  font-size: var(--pr-font-size-xs);
+  font-weight: var(--pr-font-weight-extrabold);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-parts__label {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--pr-font-size-sm);
+  font-weight: var(--pr-font-weight-bold);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-parts__range {
+  font-size: var(--pr-font-size-xs);
+  color: var(--pr-color-text-tertiary);
+}
+
+.pr-parts__size {
+  min-width: 7ch;
+  text-align: end;
+  font-size: var(--pr-font-size-xs);
+  color: var(--pr-color-text-muted);
+}
+
+/* ---------------------------------------------------------- Sheet bodies - */
+
+.pr-sheet__facts {
+  color: var(--pr-color-text-muted);
+}
+
+.pr-reclaim,
+.pr-plan {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pr-reclaim__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--pr-space-5);
+  padding-block: var(--pr-space-5);
+  border-bottom: var(--pr-border-width-hairline) solid var(--pr-color-surface-4);
+}
+
+.pr-reclaim__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.pr-reclaim__title {
+  display: block;
+  font-size: var(--pr-font-size-sm);
+  font-weight: var(--pr-font-weight-bold);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-reclaim__body {
+  display: block;
+  margin-top: var(--pr-space-1);
+  font-size: var(--pr-font-size-xs);
+  color: var(--pr-color-text-muted);
+}
+
+.pr-reclaim__value {
+  font-size: var(--pr-font-size-sm);
+  color: var(--pr-color-text-tertiary);
+}
+
+.pr-plan__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pr-space-5);
+  padding-block: var(--pr-space-5);
+  border-bottom: var(--pr-border-width-hairline) solid var(--pr-color-surface-4);
+  font-size: var(--pr-font-size-sm);
+  color: var(--pr-color-text-secondary);
+}
+
+.pr-plan__badge {
+  padding: var(--pr-space-1) var(--pr-space-3);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+  border-radius: var(--pr-radius-sm);
+  font-size: var(--pr-font-size-xs);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-widest);
+  color: var(--pr-color-text-muted);
+}
+
+/* --------------------------------------------------------- Offline slot -- */
+
+.pr-screen__banner {
+  flex: none;
+  padding: 0 var(--pr-layout-content-padding-x) var(--pr-space-4);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

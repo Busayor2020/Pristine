@@ -9,9 +9,19 @@ describe('formatBytes', () => {
     expect(formatBytes(Math.round(1.2 * 1024 * 1024 * 1024))).toBe('1.2 GB');
   });
 
-  it('keeps kilobytes whole and larger units to one decimal', () => {
+  it('keeps kilobytes whole and larger units to at most one decimal', () => {
     expect(formatBytes(1536)).toBe('2 KB');
-    expect(formatBytes(1024 * 1024)).toBe('1.0 MB');
+    expect(formatBytes(Math.round(3.14 * 1024 * 1024))).toBe('3.1 MB');
+  });
+
+  /**
+   * "412.0 MB" reads as false precision on a storage figure, and the design
+   * writes these whole. A trailing zero is never shown.
+   */
+  it('drops a trailing zero rather than inventing precision', () => {
+    expect(formatBytes(1024 * 1024)).toBe('1 MB');
+    expect(formatBytes(412 * 1024 * 1024)).toBe('412 MB');
+    expect(formatBytes(268 * 1024 * 1024)).toBe('268 MB');
   });
 
   it('crosses each unit boundary at 1024', () => {

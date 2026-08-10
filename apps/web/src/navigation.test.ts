@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { initialNavigation, navigate, type NavigationState } from './navigation.js';
+import {
+  initialNavigation,
+  isScreenName,
+  navigate,
+  screenFromLocation,
+  type NavigationState,
+} from './navigation.js';
 
 const at = (screen: Parameters<typeof initialNavigation>[0]) => initialNavigation(screen);
 
@@ -40,6 +46,19 @@ describe('navigate', () => {
     state = navigate(state, { type: 'go', screen: 'result' });
     state = navigate(state, { type: 'reset', screen: 'first-run' });
     expect(state).toEqual({ screen: 'first-run', history: [] });
+  });
+
+  it('recognises only real screen names', () => {
+    expect(isScreenName('split')).toBe(true);
+    expect(isScreenName('nonsense')).toBe(false);
+  });
+
+  /** A bad or hostile query value must not blank the app. */
+  it('falls back when the query names no screen we have', () => {
+    expect(screenFromLocation('?screen=split', 'first-run')).toBe('split');
+    expect(screenFromLocation('?screen=nonsense', 'first-run')).toBe('first-run');
+    expect(screenFromLocation('', 'first-run')).toBe('first-run');
+    expect(screenFromLocation('?other=split', 'first-run')).toBe('first-run');
   });
 
   it('walks the whole flow and back out again', () => {

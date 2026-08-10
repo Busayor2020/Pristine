@@ -170,6 +170,58 @@ export function DocumentIcon(props: IconProps) {
   );
 }
 
+export function SettingsIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props} defaultSize={20} strokeWidth={1.7}>
+      <circle cx="10" cy="10" r="2.6" />
+      <path d="M10 2.6v1.8M10 15.6v1.8M17.4 10h-1.8M4.4 10H2.6M15.2 4.8l-1.3 1.3M6.1 13.9l-1.3 1.3M15.2 15.2l-1.3-1.3M6.1 6.1L4.8 4.8" />
+    </StrokeIcon>
+  );
+}
+
+export function PlusIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props} defaultSize={17} strokeWidth={2.2}>
+      <path d="M10 4.2v11.6M4.2 10h11.6" />
+    </StrokeIcon>
+  );
+}
+
+/** Crossed-out signal. Offline. */
+export function OfflineIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props} defaultSize={17} strokeWidth={1.7}>
+      <path d="M2 2l16 16" />
+      <path d="M4.3 7.4A12 12 0 0 1 8 5.6" />
+      <path d="M17.6 7.4a12 12 0 0 0-4.4-2.3" />
+      <path d="M6.6 10.8a7.6 7.6 0 0 1 1.6-1" />
+      <path d="M15.1 11a7.6 7.6 0 0 0-1.6-1" />
+      <path d="M10 16.2h.01" />
+    </StrokeIcon>
+  );
+}
+
+/** A single tapped photo. Used where permission scope is explained. */
+export function TapIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props} defaultSize={17} strokeWidth={1.7}>
+      <rect x="2.6" y="2.6" width="10" height="10" rx="2" />
+      <path d="M8.4 11.6l2.2 6 1.5-2.6 2.9.6z" />
+    </StrokeIcon>
+  );
+}
+
+/** Two arrows circling. Reversible. */
+export function UndoIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props} defaultSize={17} strokeWidth={1.7}>
+      <path d="M3.4 8.2a7 7 0 0 1 12-2.4" />
+      <path d="M16.6 11.8a7 7 0 0 1-12 2.4" />
+      <path d="M15.8 2.6v3.4h-3.4M4.2 17.4V14h3.4" />
+    </StrokeIcon>
+  );
+}
+
 export function SaveIcon(props: IconProps) {
   return (
     <StrokeIcon {...props} defaultSize={20} strokeWidth={1.6}>

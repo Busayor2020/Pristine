@@ -2,14 +2,20 @@ import { useCallback, useEffect, useState } from 'react';
 import type { FitMode, PresetName } from '@pristine/encoder';
 import { STATUS_FRAME } from '@pristine/encoder';
 import { en } from '@pristine/copy';
+import { OfflineBanner, OfflineIcon, type LibraryItem } from '@pristine/ui';
 import { useNavigation } from './navigation.js';
+import { SheetHost, type SheetName } from './sheets.js';
 import { EducationScreen } from './screens/EducationScreen.js';
 import { EntryScreen, type ChosenFile } from './screens/EntryScreen.js';
 import { ExportScreen } from './screens/ExportScreen.js';
 import { FirstRunScreen } from './screens/FirstRunScreen.js';
+import { LibraryScreen } from './screens/LibraryScreen.js';
+import { PermissionScreen } from './screens/PermissionScreen.js';
 import { PresetScreen } from './screens/PresetScreen.js';
 import { ProcessingScreen } from './screens/ProcessingScreen.js';
 import { ResultScreen } from './screens/ResultScreen.js';
+import { SettingsScreen } from './screens/SettingsScreen.js';
+import { SplitScreen } from './screens/SplitScreen.js';
 import beforeImage from './assets/sample-fabric-degraded.jpg';
 import afterImage from './assets/sample-fabric-prepared.jpg';
 
@@ -27,6 +33,8 @@ import afterImage from './assets/sample-fabric-prepared.jpg';
  * /experiments/results.md exists.
  */
 
+const MB = 1024 * 1024;
+
 const SAMPLE_FILE: ChosenFile = {
   name: 'IMG_20260809_1432.jpg',
   width: 4032,
@@ -37,9 +45,22 @@ const SAMPLE_FILE: ChosenFile = {
 const PREPARED = {
   width: STATUS_FRAME.width,
   height: STATUS_FRAME.height,
-  bytes: Math.round(1.9 * 1024 * 1024),
+  bytes: Math.round(1.9 * MB),
   durationSeconds: 6,
 };
+
+const SAMPLE_LIBRARY: readonly LibraryItem[] = [
+  { id: '1', name: en['sample.library.1'], when: '2 days ago' },
+  { id: '2', name: en['sample.library.2'], when: '2 days ago' },
+  { id: '3', name: en['sample.library.3'], when: '5 days ago' },
+  { id: '4', name: en['sample.library.4'], when: '1 week ago' },
+  { id: '5', name: en['sample.library.5'], when: '1 week ago' },
+  { id: '6', name: en['sample.library.6'], when: '2 weeks ago' },
+].map((item, index) => ({
+  ...item,
+  src: index % 2 === 0 ? afterImage : beforeImage,
+  meta: index % 2 === 0 ? '0:06 · 2.1 MB' : '0:06 · 1.9 MB',
+}));
 
 /** How long the faked encode takes, in ms. Replaced by the real pipeline. */
 const FAKE_ENCODE_MS = 2600;
@@ -60,8 +81,24 @@ export function App() {
   const [fit, setFit] = useState<FitMode>('fit');
   const [preset, setPreset] = useState<PresetName>('balanced');
   const [percent, setPercent] = useState(0);
+  const [sheet, setSheet] = useState<SheetName | undefined>(undefined);
+  const [clipsEnabled, setClipsEnabled] = useState(true);
+  const [offline, setOffline] = useState(false);
 
   const { screen, go, back, reset } = nav;
+
+  // Mirrors the browser's own connectivity, so the banner is real rather than
+  // a prop. It is the one piece of live state this harness has.
+  useEffect(() => {
+    const update = () => setOffline(!navigator.onLine);
+    update();
+    window.addEventListener('online', update);
+    window.addEventListener('offline', update);
+    return () => {
+      window.removeEventListener('online', update);
+      window.removeEventListener('offline', update);
+    };
+  }, []);
 
   // Drives the fake encode. Real progress arrives with the encoder, which is
   // why this lives here rather than inside ProcessingScreen.
@@ -81,75 +118,166 @@ export function App() {
   }, [screen, go]);
 
   const chooseFile = useCallback(() => setFile(SAMPLE_FILE), []);
+  const closeSheet = useCallback(() => setSheet(undefined), []);
+  const openPlan = useCallback(() => setSheet('plan'), []);
 
-  switch (screen) {
-    case 'education':
-      return <EducationScreen onDismiss={back} />;
+  const screenElement = (() => {
+    switch (screen) {
+      case 'education':
+        return <EducationScreen onDismiss={back} />;
 
-    case 'entry':
-      return (
-        <EntryScreen
-          file={file}
-          thumbnailSrc={afterImage}
-          fit={fit}
-          onFitChange={setFit}
-          onBrowse={chooseFile}
-          onBack={back}
-          onContinue={() => go('preset')}
-          onInstall={() => undefined}
-        />
-      );
+      case 'permission':
+        return <PermissionScreen onAccept={() => go('entry')} onDecline={back} />;
 
-    case 'preset':
-      return (
-        <PresetScreen
-          selected={preset}
-          onSelect={setPreset}
-          lockedPresets={['max']}
-          onBack={back}
-          onPrepare={() => go('processing')}
-          onSeePlans={() => undefined}
-        />
-      );
+      case 'entry':
+        return (
+          <EntryScreen
+            file={file}
+            thumbnailSrc={afterImage}
+            fit={fit}
+            onFitChange={setFit}
+            onBrowse={chooseFile}
+            onBack={back}
+            onContinue={() => go('preset')}
+            onInstall={() => setSheet('android-only')}
+          />
+        );
 
-    case 'processing':
-      return <ProcessingScreen percent={percent} onCancel={back} />;
+      case 'preset':
+        return (
+          <PresetScreen
+            selected={preset}
+            onSelect={setPreset}
+            lockedPresets={['max']}
+            onBack={back}
+            onPrepare={() => go('processing')}
+            onSeePlans={openPlan}
+          />
+        );
 
-    case 'result':
-      return (
-        <ResultScreen
-          before={{ width: 720, height: 1280, bytes: 214 * 1024 }}
-          after={PREPARED}
-          presetName={PRESET_LABEL[preset]}
-          beforeImageSrc={beforeImage}
-          afterImageSrc={afterImage}
-          onBack={() => reset('entry')}
-          onExport={() => go('export')}
-          onWhy={() => go('education')}
-        />
-      );
+      case 'processing':
+        return <ProcessingScreen percent={percent} onCancel={back} />;
 
-    case 'export':
-      return (
-        <ExportScreen
-          {...PREPARED}
-          thumbnailSrc={afterImage}
-          onBack={back}
-          onShareToStatus={() => undefined}
-          onSendAsDocument={() => undefined}
-          onSaveToDevice={() => undefined}
-        />
-      );
+      case 'result':
+        return (
+          <ResultScreen
+            before={{ width: 720, height: 1280, bytes: 214 * 1024 }}
+            after={PREPARED}
+            presetName={PRESET_LABEL[preset]}
+            beforeImageSrc={beforeImage}
+            afterImageSrc={afterImage}
+            onBack={() => reset('library')}
+            onExport={() => go('export')}
+            onWhy={() => go('education')}
+          />
+        );
 
-    case 'first-run':
-    default:
-      return (
-        <FirstRunScreen
-          beforeImageSrc={beforeImage}
-          afterImageSrc={afterImage}
-          onPick={() => go('entry')}
-          onExplain={() => go('education')}
-        />
-      );
-  }
+      case 'export':
+        return (
+          <ExportScreen
+            {...PREPARED}
+            thumbnailSrc={afterImage}
+            onBack={back}
+            onShareToStatus={() => reset('library')}
+            onSendAsDocument={() => reset('library')}
+            onSaveToDevice={() => reset('library')}
+          />
+        );
+
+      case 'split':
+        return (
+          <SplitScreen
+            durationSeconds={88}
+            frames={[afterImage, beforeImage, afterImage, beforeImage, afterImage]}
+            maxFreeParts={2}
+            onBack={back}
+            onPrepare={() => go('processing')}
+            onSeePlans={openPlan}
+          />
+        );
+
+      case 'library':
+        return (
+          <LibraryScreen
+            items={SAMPLE_LIBRARY}
+            preparedBytes={268 * MB}
+            originalsBytes={144 * MB}
+            freeBytes={Math.round(1.2 * 1024 * MB)}
+            onOpenItem={() => setSheet('library-item')}
+            onFreeUpSpace={() => setSheet('free-up-space')}
+            onSettings={() => go('settings')}
+            onPrepare={() => reset('entry')}
+          />
+        );
+
+      case 'settings':
+        return (
+          <SettingsScreen
+            defaultPreset={PRESET_LABEL[preset]}
+            fit={fit}
+            clipsEnabled={clipsEnabled}
+            onClipsChange={setClipsEnabled}
+            keepOriginalsDays={7}
+            usedBytes={412 * MB}
+            language={en['language.english']}
+            version="1.0.0"
+            onBack={back}
+            onEditPreset={() => go('preset')}
+            onEditFit={() => go('entry')}
+            onEditRetention={() => setSheet('free-up-space')}
+            onFreeUpSpace={() => setSheet('free-up-space')}
+            onEditLanguage={() => undefined}
+            onOpenPlan={openPlan}
+          />
+        );
+
+      case 'first-run':
+      default:
+        return (
+          <FirstRunScreen
+            beforeImageSrc={beforeImage}
+            afterImageSrc={afterImage}
+            onPick={() => go('permission')}
+            onExplain={() => go('education')}
+          />
+        );
+    }
+  })();
+
+  return (
+    <>
+      {offline && (
+        <div className="pr-screen__banner">
+          <OfflineBanner
+            icon={<OfflineIcon />}
+            title={en['offline.title']}
+            body={en['offline.body']}
+          />
+        </div>
+      )}
+      {screenElement}
+      <SheetHost
+        sheet={sheet}
+        onClose={closeSheet}
+        fileBytes={Math.round(1.4 * 1024 * MB)}
+        neededBytes={Math.round(2.8 * 1024 * MB)}
+        availableBytes={Math.round(1.2 * 1024 * MB)}
+        reclaimableBytes={144 * MB}
+        onUseDataSaver={() => {
+          setPreset('saver');
+          closeSheet();
+        }}
+        onRetry={() => {
+          closeSheet();
+          go('processing');
+        }}
+        onChooseAnother={() => {
+          setFile(undefined);
+          closeSheet();
+          reset('entry');
+        }}
+        onInstall={closeSheet}
+      />
+    </>
+  );
 }

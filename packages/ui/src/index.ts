@@ -53,6 +53,34 @@ export type {
   PrimaryDestinationProps,
 } from './components/DestinationButton.js';
 
+export { Sheet } from './components/Sheet.js';
+export type { SheetProps } from './components/Sheet.js';
+
+export { SettingsGroup, SettingsRow, ToggleRow } from './components/Settings.js';
+export type {
+  SettingsGroupProps,
+  SettingsRowProps,
+  ToggleRowProps,
+} from './components/Settings.js';
+
+export { StorageMeter } from './components/StorageMeter.js';
+export type { StorageMeterProps, StorageSegment } from './components/StorageMeter.js';
+
+export { SegmentedControl } from './components/SegmentedControl.js';
+export type { Segment, SegmentedControlProps } from './components/SegmentedControl.js';
+
+export { Timeline } from './components/Timeline.js';
+export type { TimelineProps } from './components/Timeline.js';
+
+export { LibraryGrid } from './components/LibraryGrid.js';
+export type { LibraryGridProps, LibraryItem } from './components/LibraryGrid.js';
+
+export { OfflineBanner } from './components/OfflineBanner.js';
+export type { OfflineBannerProps } from './components/OfflineBanner.js';
+
+export { MIN_PART_FRACTION, evenCuts, moveCut, nearestCut, partsFromCuts } from './timeline.js';
+export type { Part } from './timeline.js';
+
 export {
   CheckIcon,
   ChevronLeftIcon,
@@ -63,9 +91,14 @@ export {
   DocumentIcon,
   InfoIcon,
   LockIcon,
+  OfflineIcon,
   OrientationIcon,
   PhotoIcon,
+  PlusIcon,
   SaveIcon,
+  SettingsIcon,
+  TapIcon,
+  UndoIcon,
   VideoIcon,
 } from './components/Icon.js';
 export type { IconProps } from './components/Icon.js';
