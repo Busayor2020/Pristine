@@ -1,16 +1,25 @@
 import { describe, expect, it } from 'vitest';
-import { PRESETS, STATUS_FRAME, fitToFrame, partsRequired } from './presets.js';
+import {
+  STATUS_FRAME,
+  STATUS_MAX_BYTES,
+  fitToFrame,
+  isUnderStatusLimit,
+  partsRequired,
+} from './status.js';
 
-describe('presets', () => {
-  it('targets the Status frame for every preset', () => {
-    for (const preset of Object.values(PRESETS)) {
-      expect(preset.output).toEqual(STATUS_FRAME);
-    }
+describe('status facts', () => {
+  it('targets a 9:16 frame', () => {
+    expect(STATUS_FRAME.width / STATUS_FRAME.height).toBeCloseTo(9 / 16, 5);
   });
 
-  it('orders bitrate from max down to saver', () => {
-    expect(PRESETS.max.bitrate).toBeGreaterThan(PRESETS.balanced.bitrate);
-    expect(PRESETS.balanced.bitrate).toBeGreaterThan(PRESETS.saver.bitrate);
+  it('caps at 16MB', () => {
+    expect(STATUS_MAX_BYTES).toBe(16_777_216);
+  });
+
+  it('accepts a file under the cap and rejects one over it', () => {
+    expect(isUnderStatusLimit(STATUS_MAX_BYTES)).toBe(true);
+    expect(isUnderStatusLimit(STATUS_MAX_BYTES + 1)).toBe(false);
+    expect(isUnderStatusLimit(0)).toBe(false);
   });
 });
 
@@ -40,19 +49,23 @@ describe('fitToFrame', () => {
 
 describe('partsRequired', () => {
   it('needs no parts for empty media', () => {
-    expect(partsRequired(0)).toBe(0);
+    expect(partsRequired(0, 30)).toBe(0);
   });
 
   it('fits a clip at the limit into one part', () => {
-    expect(partsRequired(30)).toBe(1);
+    expect(partsRequired(30, 30)).toBe(1);
   });
 
   it('rounds up past the limit', () => {
-    expect(partsRequired(31)).toBe(2);
-    expect(partsRequired(88)).toBe(3);
+    expect(partsRequired(31, 30)).toBe(2);
+    expect(partsRequired(88, 30)).toBe(3);
   });
 
   it('honours a longer part length', () => {
     expect(partsRequired(88, 60)).toBe(2);
+  });
+
+  it('rejects a non-positive part length rather than assuming one', () => {
+    expect(() => partsRequired(88, 0)).toThrow(RangeError);
   });
 });

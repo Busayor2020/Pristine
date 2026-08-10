@@ -4,10 +4,14 @@
  * Types only. This package is framework-free by policy (enforced by a
  * `no-restricted-imports` rule in the root ESLint config): nothing from React,
  * the UI package, or any renderer may cross into it, so the pipeline can run
- * in a worker, in Node, or under test without a DOM.
+ * in a Web Worker, inside Capacitor, in a Node worker, or under test.
+ *
+ * Note what is absent. There is no `Preset` type carrying encoder parameters,
+ * because no encoder parameter in this product has been measured yet. Preset
+ * NAMES exist below (they are a product decision from the design), but the
+ * values behind them arrive in stage 4, from `/experiments/results.md`.
  */
 
-/** Target frame WhatsApp Status renders at. */
 export interface Dimensions {
   readonly width: number;
   readonly height: number;
@@ -16,16 +20,12 @@ export interface Dimensions {
 /** How non-vertical source media is made to fill the Status frame. */
 export type FitMode = 'fit' | 'crop';
 
-/** The three quality presets the product exposes. */
+/**
+ * The three quality tiers the product exposes. A product-level naming
+ * decision, not an encoder configuration. Nothing here implies we know what
+ * parameters sit behind each name.
+ */
 export type PresetName = 'max' | 'balanced' | 'saver';
-
-export interface Preset {
-  readonly name: PresetName;
-  /** Output frame. */
-  readonly output: Dimensions;
-  /** Target bitrate in bits per second. */
-  readonly bitrate: number;
-}
 
 export interface SourceMedia {
   readonly kind: 'image' | 'video';

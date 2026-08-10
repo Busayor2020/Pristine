@@ -2,7 +2,13 @@
  * @pristine/encoder
  *
  * The media pipeline. Framework-free: no React, no DOM assumptions beyond what
- * a backend chooses to use internally, so it runs in a worker or under test.
+ * a backend chooses internally, so it runs in a Web Worker, inside Capacitor,
+ * or in Node under test.
+ *
+ * Stage 4 work (the actual encode paths, WebCodecs primary with ffmpeg.wasm as
+ * fallback) is not started, and must not start until `/experiments/results.md`
+ * exists. What ships today is the type contract plus the Status facts and the
+ * pure geometry that follows from them.
  */
 export type {
   Dimensions,
@@ -10,7 +16,6 @@ export type {
   FitMode,
   PrepareOptions,
   PreparedMedia,
-  Preset,
   PresetName,
   Progress,
   SourceMedia,
@@ -18,9 +23,9 @@ export type {
 } from './types.js';
 
 export {
-  PRESETS,
   STATUS_FRAME,
-  STATUS_MAX_DURATION,
+  STATUS_MAX_BYTES,
   fitToFrame,
+  isUnderStatusLimit,
   partsRequired,
-} from './presets.js';
+} from './status.js';
