@@ -15,6 +15,44 @@ The unpacker that gets from one to the other is `tools/extract-design.mjs`. It
 lives there rather than here because this directory is reference material, not
 code.
 
+## screens/
+
+27 rendered screens, the visual spec for stages 5 and 6.
+
+Phone screens are 780x1688, exactly 2x the 390x844 design viewport. Desktop
+screens are 2880x1800 and exist only for first run and library, which matches
+the rule that the phone is the product.
+
+`pristine-06` is absent. The sequence runs 01 to 28 with 06 missing, and by
+elimination it is the empty state of the web entry screen, since 07 is
+`entry-web-chosen`. The copy for it survives in `packages/copy`
+(`entryWeb.empty.*`), so nothing is lost, but the render is not here.
+
+### These are not experiment fixtures
+
+Two reasons, both worth stating because the mistake is easy to make.
+
+They are UI renders, so the photograph inside one occupies a few hundred pixels
+of a screenshot. Nowhere near the 1080x1920 a fixture needs.
+
+More importantly, **the "WhatsApp would send" side of every comparison is an
+illustration, not a measurement**. It was drawn to show heavy blocking and
+blur. Nothing in it came from actually posting a file to Status. It is the
+product's central claim rendered as a picture, and the claim is still
+unverified.
+
+That matters for the screen we build first. The comparison slider on
+`pristine-03-result` shows a dramatic difference. If the real difference turns
+out to be two VMAF points, that slider oversells and has to be redrawn from
+measured output rather than from the mock. See `experiments/README.md`.
+
+### They also still carry em dashes
+
+They are renders of the original export, so the on-screen text predates the
+punctuation pass, for example "of data to post [EM] roughly 14s on 4G". The
+copy is already fixed in `packages/copy`. Read these for layout, not for
+wording.
+
 ## Why there are two
 
 The export is a self-contained bundle, not a plain page. It is a gzip and
