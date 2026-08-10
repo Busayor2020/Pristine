@@ -77,10 +77,180 @@ body {
 
 .pr-screen__footer {
   flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-space-1);
   padding: var(--pr-space-5) var(--pr-layout-content-padding-x) var(--pr-space-7);
   /* Fades the scrolling content out behind the action rather than cutting it
      with a hard edge. */
   background: linear-gradient(to top, var(--pr-color-surface-0) 76%, transparent);
+}
+
+/* Screens carrying prose sit on the wider gutter. */
+.pr-screen__scroll--wide,
+.pr-screen__footer--wide {
+  padding-inline: var(--pr-layout-screen-padding-x);
+}
+
+.pr-screen__scroll--column {
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--pr-space-6);
+}
+
+.pr-screen__stack--tight {
+  gap: var(--pr-space-5);
+}
+
+/* Header with only a trailing control, as on the education card. */
+.pr-appbar--end {
+  justify-content: flex-end;
+}
+
+.pr-appbar--end .pr-appbar__back {
+  margin-inline: 0 calc(var(--pr-space-5) * -1);
+  color: var(--pr-color-text-tertiary);
+}
+
+/* ------------------------------------------------------------ Typography - */
+
+.pr-display {
+  margin: 0 0 var(--pr-space-5);
+  font-size: var(--pr-font-size-2xl);
+  line-height: var(--pr-line-height-tight);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-tighter);
+  color: var(--pr-color-text-primary);
+  text-wrap: pretty;
+}
+
+.pr-display--small {
+  margin-bottom: var(--pr-space-4);
+}
+
+.pr-heading {
+  margin: 0 0 var(--pr-space-3);
+  font-size: var(--pr-font-size-xl);
+  line-height: var(--pr-line-height-tight);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-tight);
+  color: var(--pr-color-text-primary);
+  text-wrap: pretty;
+}
+
+.pr-lead {
+  margin: 0 0 var(--pr-space-7);
+  font-size: var(--pr-font-size-md);
+  line-height: var(--pr-line-height-normal);
+  color: var(--pr-color-text-tertiary);
+  text-wrap: pretty;
+}
+
+.pr-lead--tight {
+  margin-bottom: var(--pr-space-8);
+}
+
+.pr-lead--small {
+  margin-bottom: var(--pr-space-6);
+  font-size: var(--pr-font-size-sm);
+  line-height: var(--pr-line-height-snug);
+}
+
+.pr-eyebrow {
+  margin: 0 0 var(--pr-space-6);
+  font-size: var(--pr-font-size-xs);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-widest);
+  color: var(--pr-color-accent-base);
+  text-transform: uppercase;
+}
+
+.pr-eyebrow--muted {
+  margin-top: var(--pr-space-8);
+  margin-bottom: var(--pr-space-5);
+  color: var(--pr-color-text-muted);
+}
+
+/* A quiet line with a leading icon, sitting outside any card. */
+.pr-hint {
+  display: flex;
+  gap: var(--pr-space-4);
+  align-items: flex-start;
+  margin: 0;
+  font-size: var(--pr-font-size-sm);
+  line-height: var(--pr-line-height-snug);
+  color: var(--pr-color-text-muted);
+}
+
+.pr-hint svg {
+  flex: none;
+  margin-top: var(--pr-space-1);
+}
+
+/* Pushed to the bottom of a column layout. */
+.pr-hint--footnote {
+  margin-top: auto;
+  padding-top: var(--pr-space-8);
+}
+
+/* --------------------------------------------------------- First run ----- */
+
+.pr-firstrun__mark {
+  padding-block: var(--pr-space-5) var(--pr-space-9);
+}
+
+.pr-firstrun__hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pr-space-3);
+  margin: var(--pr-space-5) 0 0;
+  font-size: var(--pr-font-size-xs);
+  color: var(--pr-color-text-muted);
+}
+
+.pr-firstrun__reassurance {
+  margin: 0;
+  text-align: center;
+  font-size: var(--pr-font-size-xs);
+  color: var(--pr-color-text-muted);
+}
+
+/* -------------------------------------------------- Orientation callout -- */
+
+/* A stronger border than the standard callout: this one asks a question the
+   user has to answer before continuing. */
+.pr-callout--strong {
+  padding: var(--pr-space-6);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-default);
+  border-radius: var(--pr-radius-md);
+  background: var(--pr-color-surface-1);
+}
+
+.pr-callout__lead {
+  display: flex;
+  gap: var(--pr-space-5);
+  align-items: flex-start;
+  margin-bottom: var(--pr-space-5);
+}
+
+.pr-callout__icon {
+  flex: none;
+  display: flex;
+  padding-top: var(--pr-space-1);
+  color: var(--pr-color-text-tertiary);
+}
+
+.pr-callout__lead p {
+  margin: 0;
+  font-size: var(--pr-font-size-sm);
+  line-height: var(--pr-line-height-snug);
+  color: var(--pr-color-text-tertiary);
+}
+
+/* Full width outline button, for Cancel on the processing screen. */
+.pr-button--block {
+  width: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {

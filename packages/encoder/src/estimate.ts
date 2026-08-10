@@ -9,15 +9,22 @@
 /**
  * UNVERIFIED. Assumed effective upload throughput, in bits per second.
  *
- * Derived from the design rather than invented: the export pairs "1.9 MB" with
- * "roughly 14s on 4G", which implies about 1.1 Mbps. That is a plausible real
- * world figure for a mid-range handset on Nigerian 4G, but nothing in this
- * repo measures it.
+ * Derived from the design rather than invented. The export states three size
+ * and time pairings, and they agree with each other closely:
+ *
+ *   4.2 MB in 31s  ->  1,136,521 bps
+ *   1.9 MB in 14s  ->  1,138,454 bps
+ *   0.9 MB in  7s  ->  1,078,535 bps
+ *
+ * 1,137,000 reproduces all three figures exactly once rounded. That is a
+ * plausible real world rate for a mid-range handset on Nigerian 4G, but
+ * nothing in this repo measures it, and a single number cannot describe a
+ * connection that varies by an order of magnitude through the day.
  *
  * Replace with field data before this drives anything more than a hint. It is
  * exported so a caller can override it rather than inherit an assumption.
  */
-export const ASSUMED_UPLOAD_BPS = 1_100_000;
+export const ASSUMED_UPLOAD_BPS = 1_137_000;
 
 /**
  * How long `bytes` takes to upload, in whole seconds.

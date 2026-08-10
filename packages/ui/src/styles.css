@@ -9,6 +9,21 @@
  * package builds with tsc alone and consumers import one stylesheet.
  */
 
+/* ------------------------------------------------------------- Utilities - */
+
+/* Present to assistive technology, absent on screen. */
+.pr-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---------------------------------------------------------------- Button - */
 
 .pr-button {
@@ -53,6 +68,34 @@
 
 .pr-button--quiet:hover {
   color: var(--pr-color-text-primary);
+}
+
+/* An outlined alternative that is not the primary action. */
+.pr-button--outline {
+  padding-inline: var(--pr-space-6);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-default);
+  background: transparent;
+  color: var(--pr-color-text-primary);
+  font-size: var(--pr-font-size-sm);
+  font-weight: var(--pr-font-weight-bold);
+}
+
+.pr-button--outline:hover {
+  border-color: var(--pr-color-border-strong);
+}
+
+.pr-button--outline:active {
+  background: var(--pr-color-surface-3);
+}
+
+/* The primary action when it is not yet available. */
+.pr-button--primary:disabled,
+.pr-button--outline:disabled {
+  background: var(--pr-color-surface-4);
+  border-color: transparent;
+  color: var(--pr-color-text-muted);
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Reads as a text link, sized as a control. */
@@ -381,4 +424,560 @@
   /* Reclaims the padding the 44px hit area adds, so the label stays aligned
      with the body text above it. */
   margin-block: var(--pr-space-1) calc(var(--pr-space-5) * -1);
+}
+
+/* -------------------------------------------------------------- Wordmark - */
+
+.pr-wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: var(--pr-space-2);
+}
+
+.pr-wordmark__name {
+  font-size: var(--pr-font-size-xl);
+  font-weight: var(--pr-font-weight-extrabold);
+  /* The logotype is set tighter than any body text, which is why this is the
+     one place tracking goes past the tighter step. */
+  letter-spacing: -0.055em;
+  color: var(--pr-color-text-primary);
+}
+
+.pr-wordmark__dot {
+  width: var(--pr-space-3);
+  height: var(--pr-space-3);
+  background: var(--pr-color-accent-base);
+}
+
+/* --------------------------------------------------------------- Callout - */
+
+.pr-callout {
+  padding: var(--pr-space-6);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+  border-radius: var(--pr-radius-md);
+  background: var(--pr-color-surface-2);
+}
+
+.pr-callout--inline {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-space-5);
+  background: var(--pr-color-surface-1);
+}
+
+.pr-callout--inline .pr-callout__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.pr-callout__title {
+  margin: 0 0 var(--pr-space-2);
+  font-size: var(--pr-font-size-md);
+  font-weight: var(--pr-font-weight-bold);
+  letter-spacing: var(--pr-letter-spacing-tight);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-callout__body {
+  font-size: var(--pr-font-size-sm);
+  line-height: var(--pr-line-height-snug);
+  color: var(--pr-color-text-tertiary);
+}
+
+.pr-callout__body strong {
+  color: var(--pr-color-text-primary);
+  font-weight: var(--pr-font-weight-bold);
+}
+
+.pr-callout__action {
+  margin-top: var(--pr-space-5);
+}
+
+.pr-callout--inline .pr-callout__action {
+  flex: none;
+  margin-top: 0;
+}
+
+/* --------------------------------------------------------- NumberedSteps - */
+
+.pr-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pr-steps__item {
+  display: flex;
+  gap: var(--pr-space-6);
+}
+
+.pr-steps__number {
+  flex: none;
+  width: var(--pr-space-9);
+  padding-top: var(--pr-space-1);
+  font-size: var(--pr-font-size-xs);
+  font-weight: var(--pr-font-weight-extrabold);
+  color: var(--pr-color-accent-base);
+}
+
+.pr-steps__body {
+  font-size: var(--pr-font-size-md);
+  line-height: var(--pr-line-height-normal);
+  color: var(--pr-color-text-secondary);
+}
+
+.pr-steps__body strong {
+  color: var(--pr-color-text-primary);
+  font-weight: var(--pr-font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------ OptionCard - */
+
+.pr-option {
+  display: block;
+  padding: var(--pr-space-6);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+  border-radius: var(--pr-radius-md);
+  background: var(--pr-color-surface-2);
+  color: var(--pr-color-text-primary);
+  cursor: pointer;
+}
+
+.pr-option--selected {
+  border-color: var(--pr-color-accent-base);
+  background: var(--pr-color-accent-surface);
+}
+
+/* The real radio, kept for semantics and keyboard support but drawn by the
+   dot below. Not display:none, which would remove it from the tab order. */
+.pr-option__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.pr-option__header {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-space-5);
+  margin-bottom: var(--pr-space-4);
+}
+
+.pr-option__dot {
+  flex: none;
+  display: block;
+  width: var(--pr-space-7);
+  height: var(--pr-space-7);
+  border: var(--pr-border-width-strong) solid var(--pr-color-border-strong);
+  border-radius: var(--pr-radius-full);
+}
+
+.pr-option--selected .pr-option__dot {
+  border-color: var(--pr-color-accent-base);
+  /* The inner fill, drawn with a ring rather than a child element. */
+  box-shadow: inset 0 0 0 var(--pr-space-2) var(--pr-color-accent-base);
+}
+
+.pr-option__input:focus-visible + .pr-option__header .pr-option__dot {
+  outline: var(--pr-border-width-strong) solid var(--pr-color-accent-base);
+  outline-offset: var(--pr-space-1);
+}
+
+.pr-option__name {
+  font-size: var(--pr-font-size-lg);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-tight);
+}
+
+.pr-option__badge {
+  margin-inline-start: auto;
+  font-weight: var(--pr-font-weight-extrabold);
+  font-size: var(--pr-font-size-xs);
+}
+
+.pr-option__badge--pro {
+  padding: var(--pr-space-2) var(--pr-space-3);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-accent-border);
+  border-radius: var(--pr-radius-sm);
+  background: var(--pr-color-accent-surface);
+  color: var(--pr-color-accent-base);
+  letter-spacing: var(--pr-letter-spacing-widest);
+}
+
+.pr-option__badge--quiet {
+  color: var(--pr-color-text-muted);
+  font-weight: var(--pr-font-weight-bold);
+}
+
+/* Indents past the dot, so the text block lines up under the tier name. */
+.pr-option__meta,
+.pr-option__description {
+  display: block;
+  padding-inline-start: calc(var(--pr-space-7) + var(--pr-space-5));
+}
+
+.pr-option__meta {
+  margin-bottom: var(--pr-space-2);
+  font-size: var(--pr-font-size-sm);
+  color: var(--pr-color-text-secondary);
+}
+
+.pr-option__description {
+  font-size: var(--pr-font-size-sm);
+  line-height: var(--pr-line-height-snug);
+  color: var(--pr-color-text-muted);
+}
+
+/* ------------------------------------------------------------- ChoiceRow - */
+
+.pr-choices {
+  display: flex;
+  gap: var(--pr-space-4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pr-choices__option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--pr-layout-min-touch-target);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-default);
+  border-radius: var(--pr-radius-sm);
+  background: transparent;
+  color: var(--pr-color-text-primary);
+  font-size: var(--pr-font-size-sm);
+  font-weight: var(--pr-font-weight-bold);
+  cursor: pointer;
+  text-align: center;
+}
+
+.pr-choices__option--selected {
+  border-color: var(--pr-color-accent-base);
+  background: var(--pr-color-accent-surface);
+}
+
+.pr-choices__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.pr-choices__input:focus-visible + *,
+.pr-choices__option:has(.pr-choices__input:focus-visible) {
+  outline: var(--pr-border-width-strong) solid var(--pr-color-accent-base);
+  outline-offset: var(--pr-space-1);
+}
+
+/* ---------------------------------------------------------- MediaSummary - */
+
+.pr-media {
+  display: flex;
+  gap: var(--pr-space-6);
+}
+
+.pr-media--card {
+  padding: var(--pr-space-6);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+  border-radius: var(--pr-radius-md);
+  background: var(--pr-color-surface-2);
+}
+
+.pr-media--bare {
+  align-items: center;
+  padding-bottom: var(--pr-space-7);
+  border-bottom: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+}
+
+.pr-media__thumb {
+  flex: none;
+  width: var(--pr-space-10);
+  aspect-ratio: 3 / 4;
+  border-radius: var(--pr-radius-sm);
+  overflow: hidden;
+  background: var(--pr-color-surface-media);
+}
+
+.pr-media__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pr-media__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--pr-space-2);
+}
+
+.pr-media__title {
+  font-size: var(--pr-font-size-md);
+  font-weight: var(--pr-font-weight-bold);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-media__title--truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pr-media__meta {
+  font-size: var(--pr-font-size-sm);
+  color: var(--pr-color-text-tertiary);
+}
+
+/* -------------------------------------------------------------- Progress - */
+
+.pr-progress__readout {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--pr-space-4);
+  margin-bottom: var(--pr-space-6);
+}
+
+.pr-progress__value {
+  font-size: var(--pr-font-size-3xl);
+  line-height: var(--pr-line-height-none);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-tighter);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-progress__unit {
+  padding-bottom: var(--pr-space-2);
+  font-size: var(--pr-font-size-xl);
+  font-weight: var(--pr-font-weight-extrabold);
+  color: var(--pr-color-text-muted);
+}
+
+.pr-progress__track {
+  height: var(--pr-space-2);
+  border-radius: var(--pr-radius-full);
+  background: var(--pr-color-surface-4);
+  overflow: hidden;
+}
+
+.pr-progress__fill {
+  height: 100%;
+  border-radius: var(--pr-radius-full);
+  background: var(--pr-color-accent-base);
+  transition: width var(--pr-duration-fast) var(--pr-easing-out);
+}
+
+.pr-stages {
+  margin: var(--pr-space-9) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pr-stages__item {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-space-5);
+  padding-block: var(--pr-space-5);
+  border-bottom: var(--pr-border-width-hairline) solid var(--pr-color-surface-3);
+}
+
+.pr-stages__marker {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--pr-space-7);
+  height: var(--pr-space-7);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-strong);
+  border-radius: var(--pr-radius-full);
+  color: var(--pr-color-text-on-accent);
+}
+
+.pr-stages__item--done .pr-stages__marker {
+  border-color: var(--pr-color-accent-base);
+  background: var(--pr-color-accent-base);
+}
+
+.pr-stages__item--active .pr-stages__marker {
+  border-color: var(--pr-color-accent-base);
+}
+
+.pr-stages__name {
+  flex: 1;
+  font-size: var(--pr-font-size-md);
+  color: var(--pr-color-text-muted);
+}
+
+.pr-stages__item--done .pr-stages__name {
+  color: var(--pr-color-text-tertiary);
+}
+
+.pr-stages__item--active .pr-stages__name {
+  color: var(--pr-color-text-primary);
+  font-weight: var(--pr-font-weight-bold);
+}
+
+.pr-stages__note {
+  font-size: var(--pr-font-size-xs);
+  color: var(--pr-color-text-muted);
+}
+
+/* ----------------------------------------------------------- Destination - */
+
+.pr-destination {
+  display: flex;
+  gap: var(--pr-space-5);
+  width: 100%;
+  padding: var(--pr-space-6);
+  border-radius: var(--pr-radius-md);
+  background: transparent;
+  color: var(--pr-color-text-primary);
+  text-align: start;
+  cursor: pointer;
+}
+
+.pr-destination--outlined {
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-default);
+}
+
+.pr-destination--bare {
+  border: 0;
+}
+
+.pr-destination:hover {
+  background: var(--pr-color-surface-2);
+}
+
+.pr-destination--outlined:hover {
+  border-color: var(--pr-color-border-strong);
+}
+
+.pr-destination:focus-visible {
+  outline: var(--pr-border-width-strong) solid var(--pr-color-accent-base);
+  outline-offset: var(--pr-space-1);
+}
+
+.pr-destination__icon {
+  flex: none;
+  display: flex;
+  padding-top: var(--pr-space-1);
+  color: var(--pr-color-text-tertiary);
+}
+
+.pr-destination__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.pr-destination__title {
+  display: block;
+  margin-bottom: var(--pr-space-2);
+  font-size: var(--pr-font-size-md);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-tight);
+}
+
+.pr-destination--bare .pr-destination__title {
+  color: var(--pr-color-text-secondary);
+  font-weight: var(--pr-font-weight-bold);
+}
+
+.pr-destination__description {
+  display: block;
+  font-size: var(--pr-font-size-sm);
+  line-height: var(--pr-line-height-snug);
+  color: var(--pr-color-text-tertiary);
+}
+
+.pr-destination--bare .pr-destination__description {
+  color: var(--pr-color-text-muted);
+}
+
+.pr-primary-destination {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pr-space-2);
+  width: 100%;
+  padding-block: var(--pr-space-5);
+  min-height: var(--pr-layout-primary-control-height);
+  border: 0;
+  border-radius: var(--pr-radius-md);
+  background: var(--pr-color-accent-base);
+  color: var(--pr-color-text-on-accent);
+  cursor: pointer;
+  transition: background var(--pr-duration-fast) var(--pr-easing-out);
+}
+
+.pr-primary-destination:hover {
+  background: var(--pr-color-accent-hover);
+}
+
+.pr-primary-destination:active {
+  background: var(--pr-color-accent-pressed);
+  transform: scale(0.99);
+}
+
+.pr-primary-destination:focus-visible {
+  outline: var(--pr-border-width-strong) solid var(--pr-color-text-primary);
+  outline-offset: var(--pr-space-1);
+}
+
+.pr-primary-destination__title {
+  font-size: var(--pr-font-size-lg);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-tight);
+}
+
+.pr-primary-destination__subtitle {
+  font-size: var(--pr-font-size-xs);
+  font-weight: var(--pr-font-weight-semibold);
+  /* Legible against the accent without introducing a second on-accent colour. */
+  opacity: 0.72;
+}
+
+/* ------------------------------------------------------------- DropZone -- */
+
+.pr-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--pr-space-10) var(--pr-space-8);
+  border: var(--pr-border-width-hairline) dashed var(--pr-color-border-default);
+  border-radius: var(--pr-radius-lg);
+  background: var(--pr-color-surface-1);
+}
+
+.pr-dropzone__icon {
+  color: var(--pr-color-text-muted);
+}
+
+.pr-dropzone__title {
+  margin: var(--pr-space-6) 0 0;
+  font-size: var(--pr-font-size-lg);
+  font-weight: var(--pr-font-weight-bold);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-dropzone__body {
+  max-width: 26ch;
+  margin: var(--pr-space-3) 0 0;
+  font-size: var(--pr-font-size-sm);
+  line-height: var(--pr-line-height-snug);
+  color: var(--pr-color-text-muted);
+}
+
+.pr-dropzone__action {
+  margin-top: var(--pr-space-7);
 }

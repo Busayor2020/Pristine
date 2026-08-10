@@ -9,7 +9,8 @@ export interface CompareSliderProps {
   readonly alt: string;
   readonly beforeLabel: string;
   readonly afterLabel: string;
-  readonly hint: string;
+  /** Overlaid on the media. Omit when the screen places the hint beneath. */
+  readonly hint?: string | undefined;
   /** Starting handle position, 0 to 100. */
   readonly initialPosition?: number;
 }
@@ -86,7 +87,7 @@ export function CompareSlider({
 
       <div className="pr-compare__label pr-compare__label--before">{beforeLabel}</div>
       <div className="pr-compare__label pr-compare__label--after">{afterLabel}</div>
-      <div className="pr-compare__hint">{hint}</div>
+      {hint !== undefined && <div className="pr-compare__hint">{hint}</div>}
     </div>
   );
 }

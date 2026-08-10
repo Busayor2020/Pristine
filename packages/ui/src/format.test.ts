@@ -25,7 +25,18 @@ describe('formatBytes', () => {
 
   /** Data cost is shown to users who do not read English decimal separators. */
   it('honours the locale separator', () => {
-    expect(formatBytes(Math.round(1.9 * 1024 * 1024), 'de-DE')).toBe('1,9 MB');
+    expect(formatBytes(Math.round(1.9 * 1024 * 1024), { locale: 'de-DE' })).toBe('1,9 MB');
+  });
+
+  /**
+   * The quality screen compares three sizes. Letting the smallest drop to KB
+   * would force the reader to convert units on the one screen whose whole job
+   * is comparing those numbers.
+   */
+  it('can be forced to a unit so a comparison set stays in step', () => {
+    expect(formatBytes(Math.round(0.9 * 1024 * 1024))).toBe('922 KB');
+    expect(formatBytes(Math.round(0.9 * 1024 * 1024), { unit: 'MB' })).toBe('0.9 MB');
+    expect(formatBytes(214 * 1024, { unit: 'MB' })).toBe('0.2 MB');
   });
 });
 

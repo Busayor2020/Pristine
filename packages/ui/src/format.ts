@@ -11,29 +11,43 @@ const KB = 1024;
 const MB = KB * 1024;
 const GB = MB * 1024;
 
+export type ByteUnit = 'KB' | 'MB' | 'GB';
+
+export interface FormatBytesOptions {
+  readonly locale?: string;
+  /**
+   * Forces a unit instead of picking one by magnitude.
+   *
+   * Needed wherever sizes are compared against each other. On the quality
+   * screen the three tiers are 4.2 MB, 1.9 MB and 0.9 MB: letting the smallest
+   * fall to "922 KB" would make the reader convert units in their head on the
+   * one screen whose entire job is comparing those numbers.
+   */
+  readonly unit?: ByteUnit;
+}
+
+const DIVISOR: Readonly<Record<ByteUnit, number>> = { KB, MB, GB };
+
 /**
  * Bytes as the design writes them: "214 KB", "1.9 MB", "1.2 GB".
  *
  * KB is shown whole because a tenth of a kilobyte is noise. MB and GB keep one
- * decimal, which is the precision the user can act on when deciding whether to
+ * decimal, which is the precision a user can act on when deciding whether to
  * spend their bundle.
  */
-export function formatBytes(bytes: number, locale = 'en'): string {
+export function formatBytes(bytes: number, options: FormatBytesOptions = {}): string {
   if (!Number.isFinite(bytes) || bytes < 0) throw new RangeError('bytes must be a positive number');
 
-  const [value, unit, decimals] =
-    bytes >= GB
-      ? [bytes / GB, 'GB', 1]
-      : bytes >= MB
-        ? [bytes / MB, 'MB', 1]
-        : [bytes / KB, 'KB', 0];
+  const { locale = 'en', unit } = options;
+  const chosen: ByteUnit = unit ?? (bytes >= GB ? 'GB' : bytes >= MB ? 'MB' : 'KB');
+  const decimals = chosen === 'KB' ? 0 : 1;
 
   const formatted = new Intl.NumberFormat(locale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  }).format(value as number);
+  }).format(bytes / DIVISOR[chosen]);
 
-  return `${formatted} ${unit as string}`;
+  return `${formatted} ${chosen}`;
 }
 
 /** Pixel dimensions as the design writes them, with a true multiplication sign. */

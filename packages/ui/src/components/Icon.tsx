@@ -88,3 +88,94 @@ export function VideoIcon(props: IconProps) {
     </StrokeIcon>
   );
 }
+
+export function CloseIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props} defaultSize={20} strokeWidth={1.9}>
+      <path d="M5 5l10 10M15 5L5 15" />
+    </StrokeIcon>
+  );
+}
+
+/** Empty state for the file picker. Drawn on a 24 unit grid, unlike the rest. */
+export function PhotoIcon({ size, className }: IconProps) {
+  const px = size ?? 34;
+  return (
+    <svg
+      width={px}
+      height={px}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect x="3" y="4" width="18" height="16" rx="2.5" />
+      <path d="M3 15.5l4.6-4.2a2 2 0 0 1 2.7 0L15 15.5" />
+      <path d="M14.2 13.4l1.6-1.4a2 2 0 0 1 2.6 0L21 14.2" />
+      <circle cx="8.6" cy="8.8" r="1.5" />
+    </svg>
+  );
+}
+
+export function InfoIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props} defaultSize={15} strokeWidth={1.7}>
+      <circle cx="10" cy="10" r="7.6" />
+      <path d="M10 9.2v4.4" />
+      <path d="M10 6.6h.01" />
+    </StrokeIcon>
+  );
+}
+
+/** A landscape frame against portrait guides. Marks non-vertical media. */
+export function OrientationIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props} defaultSize={17} strokeWidth={1.6}>
+      <rect x="1.6" y="5.4" width="16.8" height="9.2" rx="1.8" />
+      <path d="M7.3 2.6v14.8" strokeDasharray="2 2" />
+      <path d="M12.7 2.6v14.8" strokeDasharray="2 2" />
+    </StrokeIcon>
+  );
+}
+
+export function CheckIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props} defaultSize={11} strokeWidth={2.2}>
+      <path d="M2.5 6.3l2.4 2.4 4.6-5" />
+    </StrokeIcon>
+  );
+}
+
+/** Closed padlock. Nothing leaves the device. */
+export function LockIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props} defaultSize={15} strokeWidth={1.7}>
+      <rect x="4" y="8.6" width="12" height="8" rx="2" />
+      <path d="M7 8.6V6.4a3 3 0 0 1 6 0v2.2" />
+    </StrokeIcon>
+  );
+}
+
+export function DocumentIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props} defaultSize={20} strokeWidth={1.6}>
+      <path d="M11.4 2.4H5.6a1.8 1.8 0 0 0-1.8 1.8v11.6a1.8 1.8 0 0 0 1.8 1.8h8.8a1.8 1.8 0 0 0 1.8-1.8V7.4z" />
+      <path d="M11.4 2.4v5h4.8" />
+    </StrokeIcon>
+  );
+}
+
+export function SaveIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props} defaultSize={20} strokeWidth={1.6}>
+      <path d="M10 3v9.4" />
+      <path d="M6 8.6l4 3.8 4-3.8" />
+      <path d="M3.4 16.6h13.2" />
+    </StrokeIcon>
+  );
+}

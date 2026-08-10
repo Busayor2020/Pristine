@@ -3,12 +3,16 @@ import { ASSUMED_UPLOAD_BPS, estimateUploadSeconds } from './estimate.js';
 
 describe('estimateUploadSeconds', () => {
   /**
-   * The design pairs "1.9 MB" with "roughly 14s on 4G". The assumed throughput
-   * was derived from that pairing, so it has to reproduce it. If this test
-   * fails, either the constant moved or the design's own arithmetic did.
+   * The assumed throughput was fitted to the three size and time pairings the
+   * design states, so it has to reproduce all three. If this fails, either the
+   * constant moved or the design's own arithmetic did.
    */
-  it('reproduces the figure the design shows', () => {
-    expect(estimateUploadSeconds(Math.round(1.9 * 1024 * 1024))).toBe(14);
+  it.each([
+    [4.2, 31],
+    [1.9, 14],
+    [0.9, 7],
+  ])('reproduces the design figure: %s MB in %ss', (megabytes, seconds) => {
+    expect(estimateUploadSeconds(Math.round(megabytes * 1024 * 1024))).toBe(seconds);
   });
 
   it('scales with size', () => {

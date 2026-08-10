@@ -9,5 +9,12 @@
  */
 export { en } from './en.js';
 export type { Copy, CopyKey } from './en.js';
-export { format, interpolate, placeholdersIn, placeholdersInTemplate } from './format.js';
-export type { CopyValues } from './format.js';
+export {
+  format,
+  interpolate,
+  placeholdersIn,
+  placeholdersInTemplate,
+  templateParts,
+  templatePartsOf,
+} from './format.js';
+export type { CopyValues, TemplatePart } from './format.js';

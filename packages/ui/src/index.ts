@@ -26,11 +26,46 @@ export type { NoteCardProps } from './components/NoteCard.js';
 export { StatPair } from './components/StatPair.js';
 export type { StatColumn, StatPairProps } from './components/StatPair.js';
 
+export { Wordmark } from './components/Wordmark.js';
+export type { WordmarkProps } from './components/Wordmark.js';
+
+export { Callout } from './components/Callout.js';
+export type { CalloutProps } from './components/Callout.js';
+
+export { NumberedSteps } from './components/NumberedSteps.js';
+export type { NumberedStepsProps } from './components/NumberedSteps.js';
+
+export { OptionCard } from './components/OptionCard.js';
+export type { OptionCardProps } from './components/OptionCard.js';
+
+export { ChoiceRow } from './components/ChoiceRow.js';
+export type { Choice, ChoiceRowProps } from './components/ChoiceRow.js';
+
+export { MediaSummary } from './components/MediaSummary.js';
+export type { MediaSummaryProps } from './components/MediaSummary.js';
+
+export { ProgressBar, StageList } from './components/Progress.js';
+export type { ProgressBarProps, Stage, StageListProps } from './components/Progress.js';
+
+export { DestinationButton, PrimaryDestination } from './components/DestinationButton.js';
+export type {
+  DestinationButtonProps,
+  PrimaryDestinationProps,
+} from './components/DestinationButton.js';
+
 export {
+  CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  CloseIcon,
   CompareIcon,
   DataIcon,
+  DocumentIcon,
+  InfoIcon,
+  LockIcon,
+  OrientationIcon,
+  PhotoIcon,
+  SaveIcon,
   VideoIcon,
 } from './components/Icon.js';
 export type { IconProps } from './components/Icon.js';

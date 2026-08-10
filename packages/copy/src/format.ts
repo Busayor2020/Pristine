@@ -39,3 +39,34 @@ export function placeholdersInTemplate(template: string): string[] {
 export function placeholdersIn(key: CopyKey): string[] {
   return placeholdersInTemplate(en[key]);
 }
+
+export type TemplatePart =
+  | { readonly kind: 'text'; readonly text: string }
+  | { readonly kind: 'placeholder'; readonly name: string };
+
+/**
+ * A copy string split into literal text and its placeholders.
+ *
+ * Exists so a screen can emphasise an interpolated value (a size, a duration)
+ * without the sentence being concatenated at the call site. Concatenation is
+ * what breaks translation: the emphasised value does not sit in the same place
+ * in every language, and splitting on the template preserves whatever order
+ * the translator chose.
+ */
+export function templatePartsOf(template: string): TemplatePart[] {
+  const parts: TemplatePart[] = [];
+  let cursor = 0;
+  for (const match of template.matchAll(PLACEHOLDER)) {
+    const index = match.index ?? 0;
+    if (index > cursor) parts.push({ kind: 'text', text: template.slice(cursor, index) });
+    parts.push({ kind: 'placeholder', name: match[1] as string });
+    cursor = index + match[0].length;
+  }
+  if (cursor < template.length) parts.push({ kind: 'text', text: template.slice(cursor) });
+  return parts;
+}
+
+/** As `templatePartsOf`, for a key in the shipped catalogue. */
+export function templateParts(key: CopyKey): TemplatePart[] {
+  return templatePartsOf(en[key]);
+}
