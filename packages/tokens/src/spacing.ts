@@ -23,12 +23,39 @@ export const space = {
 } as const;
 
 /**
- * Horizontal padding for full-bleed screen content. The design settled on 24px
- * for primary screens and 16px for sheets and inset cards.
+ * Layout constants that are not spacing but are still values a component must
+ * not invent. A magic pixel in a component is a defect, so anything with a
+ * fixed size lands here.
  */
 export const layout = {
+  /** Screens carrying prose. First run, education, permission. */
   screenPaddingX: space[8],
-  sheetPaddingX: space[6],
+  /** Dense screens, sheets and inset cards. Result, export, library. */
+  contentPaddingX: space[6],
+
+  /**
+   * Minimum hit area for anything interactive, in px.
+   *
+   * Not negotiable and not a style choice. The product is used one handed,
+   * outdoors, often in a hurry. A control smaller than this gets missed, and a
+   * missed control on the export screen means a lost post.
+   */
+  minTouchTarget: 44,
+
+  /** Screen header. Back control, title, trailing status. */
+  appBarHeight: 48,
+
+  /** The single primary action at the bottom of a screen. */
+  primaryControlHeight: 54,
+
+  /**
+   * The before and after preview box.
+   *
+   * The design fixes it at 358x404 inside a 390 wide frame. Expressed as a
+   * ratio rather than a height so it holds on a narrower handset instead of
+   * pushing the primary action off screen.
+   */
+  compareAspectRatio: '179 / 202',
 } as const;
 
 export type SpaceToken = keyof typeof space;

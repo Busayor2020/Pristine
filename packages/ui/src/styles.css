@@ -1,0 +1,384 @@
+/*
+ * Component styles.
+ *
+ * Every value here is a token custom property. No hex, no magic pixels: a
+ * literal in this file would be a defect, and tools/checks/no-stray-hex.mjs
+ * fails the build on one.
+ *
+ * Plain CSS with a flat naming convention rather than CSS Modules, so the
+ * package builds with tsc alone and consumers import one stylesheet.
+ */
+
+/* ---------------------------------------------------------------- Button - */
+
+.pr-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pr-space-2);
+  min-height: var(--pr-layout-min-touch-target);
+  border: 0;
+  border-radius: var(--pr-radius-md);
+  font-family: var(--pr-font-family-sans);
+  letter-spacing: var(--pr-letter-spacing-tight);
+  cursor: pointer;
+  transition: background var(--pr-duration-fast) var(--pr-easing-out);
+}
+
+.pr-button--primary {
+  width: 100%;
+  height: var(--pr-layout-primary-control-height);
+  background: var(--pr-color-accent-base);
+  color: var(--pr-color-text-on-accent);
+  font-size: var(--pr-font-size-lg);
+  font-weight: var(--pr-font-weight-extrabold);
+}
+
+.pr-button--primary:hover {
+  background: var(--pr-color-accent-hover);
+}
+
+.pr-button--primary:active {
+  background: var(--pr-color-accent-pressed);
+  transform: scale(0.985);
+}
+
+.pr-button--quiet {
+  width: 100%;
+  background: transparent;
+  color: var(--pr-color-text-tertiary);
+  font-size: var(--pr-font-size-md);
+  font-weight: var(--pr-font-weight-bold);
+}
+
+.pr-button--quiet:hover {
+  color: var(--pr-color-text-primary);
+}
+
+/* Reads as a text link, sized as a control. */
+.pr-button--inline {
+  justify-content: flex-start;
+  padding-inline: var(--pr-space-4);
+  margin-inline-start: calc(var(--pr-space-4) * -1);
+  background: transparent;
+  color: var(--pr-color-accent-base);
+  font-size: var(--pr-font-size-sm);
+  font-weight: var(--pr-font-weight-extrabold);
+}
+
+.pr-button--inline:active {
+  color: var(--pr-color-accent-pressed);
+}
+
+.pr-button:focus-visible {
+  outline: var(--pr-border-width-strong) solid var(--pr-color-accent-base);
+  outline-offset: var(--pr-space-1);
+}
+
+/* ---------------------------------------------------------------- AppBar - */
+
+.pr-appbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--pr-space-3);
+  height: var(--pr-layout-app-bar-height);
+  padding-inline: var(--pr-layout-content-padding-x);
+}
+
+.pr-appbar__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--pr-layout-min-touch-target);
+  height: var(--pr-layout-min-touch-target);
+  /* Pulls the glyph to the optical margin while the hit area stays full size. */
+  margin-inline-start: calc(var(--pr-space-5) * -1);
+  border: 0;
+  background: transparent;
+  color: var(--pr-color-text-primary);
+  cursor: pointer;
+}
+
+.pr-appbar__back:focus-visible {
+  outline: var(--pr-border-width-strong) solid var(--pr-color-accent-base);
+  outline-offset: calc(var(--pr-space-1) * -1);
+  border-radius: var(--pr-radius-sm);
+}
+
+.pr-appbar__title {
+  margin: 0;
+  font-size: var(--pr-font-size-lg);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-tight);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-appbar__trailing {
+  margin-inline-start: auto;
+  font-size: var(--pr-font-size-xs);
+  color: var(--pr-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------- CompareSlider - */
+
+.pr-compare {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--pr-layout-compare-aspect-ratio);
+  border-radius: var(--pr-radius-md);
+  overflow: hidden;
+  background: var(--pr-color-surface-media);
+  /* The browser must not claim the gesture as a scroll or a pinch. */
+  touch-action: none;
+  cursor: ew-resize;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pr-compare__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.pr-compare__after {
+  position: absolute;
+  inset: 0;
+}
+
+.pr-compare__divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--pr-border-width-strong);
+  background: var(--pr-color-accent-base);
+  /* Holds the line off bright media without a second element. */
+  box-shadow: var(--pr-shadow-ring);
+  pointer-events: none;
+}
+
+.pr-compare__handle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--pr-layout-min-touch-target);
+  height: var(--pr-layout-min-touch-target);
+  border-radius: var(--pr-radius-full);
+  background: var(--pr-color-accent-base);
+  color: var(--pr-color-text-on-accent);
+  box-shadow: var(--pr-shadow-md);
+  pointer-events: none;
+}
+
+.pr-compare__label {
+  position: absolute;
+  top: var(--pr-space-5);
+  padding: var(--pr-space-3) var(--pr-space-5);
+  border-radius: var(--pr-radius-sm);
+  font-size: var(--pr-font-size-xs);
+  letter-spacing: var(--pr-letter-spacing-normal);
+  pointer-events: none;
+}
+
+.pr-compare__label--before {
+  inset-inline-start: var(--pr-space-5);
+  background: var(--pr-scrim-caption);
+  backdrop-filter: blur(var(--pr-scrim-blur));
+  color: var(--pr-color-text-secondary);
+  font-weight: var(--pr-font-weight-bold);
+}
+
+.pr-compare__label--after {
+  inset-inline-end: var(--pr-space-5);
+  background: var(--pr-color-accent-base);
+  color: var(--pr-color-text-on-accent);
+  font-weight: var(--pr-font-weight-extrabold);
+}
+
+.pr-compare__hint {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: var(--pr-space-4);
+  /* Gradient rather than a solid bar, so the hint sits over the photo without
+     cropping it. */
+  background: linear-gradient(to top, var(--pr-scrim-sheet), transparent);
+  font-size: var(--pr-font-size-xs);
+  font-weight: var(--pr-font-weight-semibold);
+  color: var(--pr-color-text-secondary);
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------------- StatPair - */
+
+/*
+ * One grid, not two columns. Rows are shared, so the two values stay on the
+ * same baseline even when one label wraps and the other does not.
+ */
+.pr-stats {
+  display: grid;
+  grid-template-columns: 1fr var(--pr-border-width-hairline) 1fr;
+  grid-template-areas:
+    'before-label divider after-label'
+    'before-value divider after-value'
+    'before-meta  divider after-meta';
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+  border-radius: var(--pr-radius-md);
+  background: var(--pr-color-surface-2);
+  overflow: hidden;
+}
+
+.pr-stats__before-label {
+  grid-area: before-label;
+}
+.pr-stats__before-value {
+  grid-area: before-value;
+}
+.pr-stats__before-meta {
+  grid-area: before-meta;
+}
+.pr-stats__after-label {
+  grid-area: after-label;
+}
+.pr-stats__after-value {
+  grid-area: after-value;
+}
+.pr-stats__after-meta {
+  grid-area: after-meta;
+}
+
+.pr-stats__divider {
+  grid-area: divider;
+  background: var(--pr-color-border-subtle);
+}
+
+.pr-stats__label,
+.pr-stats__value,
+.pr-stats__meta {
+  min-width: 0;
+  padding-inline: var(--pr-space-6);
+}
+
+.pr-stats__label {
+  padding-block-start: var(--pr-space-6);
+  padding-block-end: var(--pr-space-4);
+  font-size: var(--pr-font-size-xs);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-widest);
+  color: var(--pr-color-text-muted);
+  text-transform: uppercase;
+  /* Keeps the two labels the same height when only one of them wraps. */
+  align-self: end;
+}
+
+.pr-stats__label--accent {
+  color: var(--pr-color-accent-base);
+}
+
+.pr-stats__value {
+  font-size: var(--pr-font-size-lg);
+  font-weight: var(--pr-font-weight-bold);
+  letter-spacing: var(--pr-letter-spacing-tight);
+  color: var(--pr-color-text-secondary);
+}
+
+.pr-stats__value--accent {
+  color: var(--pr-color-text-primary);
+}
+
+.pr-stats__meta {
+  padding-block-start: var(--pr-space-1);
+  padding-block-end: var(--pr-space-6);
+  font-size: var(--pr-font-size-sm);
+  color: var(--pr-color-text-muted);
+}
+
+.pr-stats__meta--accent {
+  color: var(--pr-color-text-tertiary);
+}
+
+/* -------------------------------------------------------------- NoteCard - */
+
+.pr-note {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-space-4);
+  padding: var(--pr-space-5) var(--pr-space-6);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+  border-radius: var(--pr-radius-md);
+  background: var(--pr-color-surface-1);
+}
+
+.pr-note__icon {
+  flex: none;
+  display: flex;
+  color: var(--pr-color-text-muted);
+}
+
+.pr-note__body {
+  flex: 1;
+  margin: 0;
+  font-size: var(--pr-font-size-sm);
+  line-height: var(--pr-line-height-snug);
+  color: var(--pr-color-text-tertiary);
+}
+
+.pr-note__body strong {
+  color: var(--pr-color-text-primary);
+  font-weight: var(--pr-font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------- ExplainerCard - */
+
+.pr-explainer {
+  display: flex;
+  gap: var(--pr-space-5);
+  padding: var(--pr-space-6);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+  border-radius: var(--pr-radius-md);
+  background: var(--pr-color-surface-2);
+}
+
+.pr-explainer__icon {
+  flex: none;
+  display: flex;
+  color: var(--pr-color-accent-base);
+}
+
+.pr-explainer__content {
+  min-width: 0;
+}
+
+.pr-explainer__title {
+  margin: 0 0 var(--pr-space-2);
+  font-size: var(--pr-font-size-md);
+  font-weight: var(--pr-font-weight-bold);
+  letter-spacing: var(--pr-letter-spacing-tight);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-explainer__body {
+  margin: 0;
+  font-size: var(--pr-font-size-sm);
+  line-height: var(--pr-line-height-normal);
+  color: var(--pr-color-text-tertiary);
+  text-wrap: pretty;
+}
+
+.pr-explainer__action {
+  /* Reclaims the padding the 44px hit area adds, so the label stays aligned
+     with the body text above it. */
+  margin-block: var(--pr-space-1) calc(var(--pr-space-5) * -1);
+}

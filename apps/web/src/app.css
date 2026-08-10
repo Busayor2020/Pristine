@@ -7,6 +7,7 @@
  */
 @import '@pristine/tokens/fonts.css';
 @import '@pristine/tokens/tokens.css';
+@import '@pristine/ui/styles.css';
 
 *,
 *::before,
@@ -35,6 +36,51 @@ body {
 /* Sizes, durations and byte counts must not reflow while they update. */
 .pr-numeric {
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Screen shell.
+ *
+ * One scrolling region between a fixed header and a fixed footer, so the
+ * primary action stays thumb reachable no matter how long the content is.
+ * 100dvh rather than 100vh because mobile browser chrome collapses on scroll
+ * and 100vh would put the footer under it.
+ */
+.pr-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background: var(--pr-color-surface-0);
+}
+
+.pr-screen__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-inline: var(--pr-layout-content-padding-x);
+  padding-bottom: var(--pr-space-4);
+  /* The scrollbar is a desktop artefact here and cuts into the media. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pr-screen__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.pr-screen__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-space-5);
+  margin-top: var(--pr-space-6);
+}
+
+.pr-screen__footer {
+  flex: none;
+  padding: var(--pr-space-5) var(--pr-layout-content-padding-x) var(--pr-space-7);
+  /* Fades the scrolling content out behind the action rather than cutting it
+     with a hard edge. */
+  background: linear-gradient(to top, var(--pr-color-surface-0) 76%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

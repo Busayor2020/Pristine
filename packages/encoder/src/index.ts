@@ -29,3 +29,5 @@ export {
   isUnderStatusLimit,
   partsRequired,
 } from './status.js';
+
+export { ASSUMED_UPLOAD_BPS, estimateUploadSeconds } from './estimate.js';

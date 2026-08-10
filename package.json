@@ -18,7 +18,7 @@
     "lint:fix": "eslint . --fix && prettier --write .",
     "check:em-dash": "node tools/checks/no-em-dash.mjs",
     "check:hex": "node tools/checks/no-stray-hex.mjs",
-    "dev": "pnpm --filter @pristine/web run dev",
+    "dev": "pnpm --filter @pristine/tokens run build && pnpm --filter @pristine/web run dev",
     "exp": "pnpm --filter @pristine/experiments run start",
     "clean": "node tools/checks/clean.mjs"
   },

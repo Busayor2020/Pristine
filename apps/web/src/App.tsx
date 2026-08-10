@@ -1,43 +1,35 @@
-import { en } from '@pristine/copy';
+import { ResultScreen } from './screens/ResultScreen.js';
+import beforeImage from './assets/sample-fabric-degraded.jpg';
+import afterImage from './assets/sample-fabric-prepared.jpg';
 
 /**
- * Scaffold entry point, not a screen.
+ * Stage 5 harness.
  *
- * It exists to prove the wiring end to end: copy resolves from
- * @pristine/ui, every value below is a token custom property, and the PWA
- * shell mounts. Screens replace this.
+ * There is no router and no state library yet, so this renders the one screen
+ * that exists against sample data. The figures below are the design's own, kept
+ * so the screen can be compared against the render in design/screens.
+ *
+ * The two images are the design's mock photography. The "degraded" one is an
+ * illustration of what the image pipeline does, drawn by the designer. It is
+ * not measured output, and it gets replaced with real returned media once
+ * /experiments/results.md exists.
  */
 export function App() {
   return (
-    <main
-      style={{
-        minHeight: '100dvh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: 'var(--pr-layout-screen-padding-x)',
-        gap: 'var(--pr-space-3)',
+    <ResultScreen
+      before={{ width: 720, height: 1280, bytes: 214 * 1024 }}
+      after={{
+        width: 1080,
+        height: 1920,
+        bytes: Math.round(1.9 * 1024 * 1024),
+        durationSeconds: 6,
       }}
-    >
-      <h1
-        style={{
-          margin: 0,
-          fontSize: 'var(--pr-font-size-xl)',
-          fontWeight: 'var(--pr-font-weight-extrabold)',
-          letterSpacing: 'var(--pr-letter-spacing-tighter)',
-        }}
-      >
-        {en['app.name']}
-      </h1>
-      <p
-        style={{
-          margin: 0,
-          color: 'var(--pr-color-text-tertiary)',
-          fontSize: 'var(--pr-font-size-sm)',
-        }}
-      >
-        {en['firstRun.reassurance']}
-      </p>
-    </main>
+      presetName="Balanced"
+      beforeImageSrc={beforeImage}
+      afterImageSrc={afterImage}
+      onBack={() => undefined}
+      onExport={() => undefined}
+      onWhy={() => undefined}
+    />
   );
 }
