@@ -5,3 +5,11 @@ coverage
 pnpm-lock.yaml
 packages/tokens/fonts
 apps/web/public
+
+# Claude Design exports, kept verbatim as reference. Reformatting them would
+# destroy the artefact we are comparing against.
+design/*.html
+
+# Generated and downloaded measurement data.
+experiments/candidates
+experiments/returned

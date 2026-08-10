@@ -57,9 +57,11 @@ pnpm typecheck
 ```
 apps/web            React 18 + TypeScript + Vite, installable PWA
 packages/tokens     Design tokens. The single source of truth for colour and sizing
-packages/ui         Shared components and the copy catalogue
+packages/copy       Every user-facing string. No string literals in components
+packages/ui         Shared components. Empty until stage 5
 packages/encoder    Media pipeline. Framework-free, no React
-experiments         CLI harness for driving the pipeline from a terminal. Not shipped
+experiments         CLI measurement harness. Node. Never shipped, never imported
+design              Claude Design exports. Reference material, not code
 tools               Local ESLint rule and the repo-wide checks
 ```
 
@@ -82,12 +84,21 @@ worker, in Node under test, and eventually behind a native Android bridge, so
 it cannot assume a renderer. `experiments` exists to drive it from a terminal
 against real files without a browser in the way.
 
-**Copy is data.** Every user-facing string lives in
-`packages/ui/src/copy/en.ts` as a flat, dot-keyed object with `{name}`
-placeholders for anything that varies. Nothing is concatenated at the call
-site, because word order around an interpolated value changes between
-languages. Adding a locale is copying one file. `format()` is a deliberate
-20-line stand-in for a real i18n runtime, swappable in one module.
+**Copy is data.** Every user-facing string lives in `packages/copy/src/en.ts`
+as a flat, dot-keyed object with `{name}` placeholders for anything that
+varies. Nothing is concatenated at the call site, because word order around an
+interpolated value changes between languages. Adding a locale is copying one
+file. `format()` is a deliberate stand-in for a real i18n runtime, swappable in
+one module.
+
+**Unproven claims are quarantined.** The photo-as-video technique is the
+product's central bet and it has not been measured. Strings that assert a
+quality gain from it live in `packages/copy/src/unverified.ts`, which the
+package index does not re-export, so reaching them takes a deep import that
+shows up in review. Tests assert that the shipped catalogue makes no banned
+compression claim, asserts no unmeasured gain, and implies no affiliation with
+WhatsApp. Nothing in `packages/encoder` carries an encoder parameter yet, for
+the same reason.
 
 **The em dash is banned.** A custom ESLint rule
 (`tools/eslint-rules/no-em-dash.js`) fails the build on the character in any JS

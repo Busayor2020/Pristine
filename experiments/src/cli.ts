@@ -8,7 +8,7 @@
  *   pnpm --filter @pristine/experiments start tokens
  *   pnpm --filter @pristine/experiments start fit 4032 3024 crop
  */
-import { PRESETS, STATUS_FRAME, fitToFrame, partsRequired } from '@pristine/encoder';
+import { STATUS_FRAME, fitToFrame, partsRequired } from '@pristine/encoder';
 import { toCssVariables } from '@pristine/tokens';
 
 type Command = (args: readonly string[]) => void;
@@ -39,16 +39,11 @@ const commands: Record<string, Command> = {
   /** Shows how a clip of N seconds splits across Status posts. */
   split(args) {
     const seconds = Number(args[0]);
-    if (!Number.isFinite(seconds)) throw new TypeError('usage: split <seconds> [partLength]');
-    const partLength = args[1] === undefined ? undefined : Number(args[1]);
-    console.log(`${seconds}s needs ${partsRequired(seconds, partLength)} part(s)`);
-  },
-
-  /** Lists the quality presets and their bitrates. */
-  presets() {
-    for (const preset of Object.values(PRESETS)) {
-      console.log(`${preset.name.padEnd(9)} ${(preset.bitrate / 1_000_000).toFixed(1)} Mbps`);
+    const partLength = Number(args[1]);
+    if (!Number.isFinite(seconds) || !Number.isFinite(partLength)) {
+      throw new TypeError('usage: split <seconds> <partLength>');
     }
+    console.log(`${seconds}s needs ${partsRequired(seconds, partLength)} part(s)`);
   },
 };
 

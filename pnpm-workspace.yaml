@@ -6,3 +6,6 @@ packages:
 # need it, so the script is allowed to run.
 allowBuilds:
   esbuild: true
+  # ffmpeg-static downloads its platform binary in a postinstall. Used only by
+  # the experiments harness, never shipped in an app bundle.
+  ffmpeg-static: true
