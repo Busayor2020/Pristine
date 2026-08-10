@@ -4,7 +4,10 @@ import { STATUS_FRAME } from '@pristine/encoder';
 import { en } from '@pristine/copy';
 import { OfflineBanner, OfflineIcon, type LibraryItem } from '@pristine/ui';
 import { useNavigation } from './navigation.js';
+import { useIsDesktop } from './useMediaQuery.js';
 import { SheetHost, type SheetName } from './sheets.js';
+import { DesktopFirstRunScreen } from './screens/DesktopFirstRunScreen.js';
+import { DesktopLibraryScreen } from './screens/DesktopLibraryScreen.js';
 import { EducationScreen } from './screens/EducationScreen.js';
 import { EntryScreen, type ChosenFile } from './screens/EntryScreen.js';
 import { ExportScreen } from './screens/ExportScreen.js';
@@ -77,6 +80,7 @@ const PRESET_LABEL: Readonly<Record<PresetName, string>> = {
 
 export function App() {
   const nav = useNavigation('first-run');
+  const isDesktop = useIsDesktop();
   const [file, setFile] = useState<ChosenFile | undefined>(undefined);
   const [fit, setFit] = useState<FitMode>('fit');
   const [preset, setPreset] = useState<PresetName>('balanced');
@@ -196,7 +200,24 @@ export function App() {
           />
         );
 
+      // First run and library are the only two screens the brief allows a
+      // desktop variant for. Everything else keeps the phone layout at every
+      // width, because the phone is the product.
       case 'library':
+        if (isDesktop) {
+          return (
+            <DesktopLibraryScreen
+              items={SAMPLE_LIBRARY}
+              preparedBytes={268 * MB}
+              originalsBytes={144 * MB}
+              freeBytes={Math.round(1.2 * 1024 * MB)}
+              onReshare={() => setSheet('library-item')}
+              onFreeUpSpace={() => setSheet('free-up-space')}
+              onSettings={() => go('settings')}
+              onPrepare={() => reset('entry')}
+            />
+          );
+        }
         return (
           <LibraryScreen
             items={SAMPLE_LIBRARY}
@@ -233,6 +254,20 @@ export function App() {
 
       case 'first-run':
       default:
+        if (isDesktop) {
+          return (
+            <DesktopFirstRunScreen
+              beforeImageSrc={beforeImage}
+              afterImageSrc={afterImage}
+              before={{ width: 720, height: 1280, bytes: 214 * 1024 }}
+              after={PREPARED}
+              onPick={() => go('entry')}
+              onExplain={() => go('education')}
+              onLibrary={() => go('library')}
+              onInstall={() => setSheet('android-only')}
+            />
+          );
+        }
         return (
           <FirstRunScreen
             beforeImageSrc={beforeImage}

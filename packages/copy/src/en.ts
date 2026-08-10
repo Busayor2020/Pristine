@@ -298,6 +298,28 @@ export const en = {
   'sheet.plan.item2': 'Splits past 2 parts',
   'sheet.plan.item3': 'Batches and brand kit',
 
+  // Desktop.
+  //
+  // The brief allows desktop variants for first run and library only, and the
+  // wording genuinely differs rather than merely reflowing: on a laptop
+  // "your phone" is wrong, and "nothing leaves your phone" is a promise about
+  // the wrong device. These are separate strings on purpose, not duplicates.
+  'desktop.nav.howItWorks': 'How it works',
+  'desktop.nav.library': 'Library',
+  'desktop.nav.settings': 'Settings',
+  'desktop.nav.getApp': 'Get the Android app',
+
+  'desktop.firstRun.eyebrow': 'RUNS IN YOUR BROWSER · NOTHING UPLOADED',
+  'desktop.firstRun.body':
+    "WhatsApp re-encodes everything on your device before it uploads, and detail goes with it. Pristine prepares your photo or video first, so there's far less for that to ruin.",
+  'desktop.firstRun.cta': 'Choose a photo',
+  'desktop.firstRun.reassurance': 'No account, no email. Your media never leaves this device.',
+
+  'desktop.library.meta': '{count} items · {size} prepared',
+  'desktop.library.reshare': 'Re-share',
+  'desktop.library.using': 'Using {size}',
+  'desktop.library.free': '{size} free on this device',
+
   // Languages, shown untranslated in their own script
   'language.english': 'English',
   'language.pidgin': 'Nigerian Pidgin',

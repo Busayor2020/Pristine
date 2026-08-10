@@ -519,6 +519,349 @@ body {
   padding: 0 var(--pr-layout-content-padding-x) var(--pr-space-4);
 }
 
+/* ========================================================================= *
+ * Desktop
+ *
+ * First run and library only. The phone is the product, so everything here is
+ * additive: nothing below changes a phone layout, and these rules only apply
+ * to the two desktop variant components.
+ * ========================================================================= */
+
+.pr-desktop {
+  min-height: 100dvh;
+  background: var(--pr-color-surface-0);
+}
+
+.pr-topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pr-space-8);
+  padding: var(--pr-space-6) var(--pr-space-9);
+  border-bottom: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+}
+
+.pr-topnav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-space-5);
+}
+
+/* Quiet buttons default to full width for the phone footer. In a nav row they
+   size to their label. */
+.pr-topnav__link {
+  width: auto;
+  padding-inline: var(--pr-space-5);
+}
+
+/* ------------------------------------------------------------------ Hero - */
+
+.pr-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: var(--pr-space-10);
+  max-width: var(--pr-layout-desktop-max-width);
+  margin: 0 auto;
+  padding: var(--pr-space-10) var(--pr-space-9);
+}
+
+.pr-hero__title {
+  margin: 0 0 var(--pr-space-7);
+  /* Larger than any phone step. Display type at this width is its own scale,
+     so it is expressed as a ratio of the largest step rather than a new one. */
+  font-size: calc(var(--pr-font-size-3xl) * 1.6);
+  line-height: var(--pr-line-height-tight);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-tighter);
+  color: var(--pr-color-text-primary);
+  text-wrap: balance;
+}
+
+.pr-hero__body {
+  max-width: 46ch;
+  margin: 0 0 var(--pr-space-9);
+  font-size: var(--pr-font-size-lg);
+  line-height: var(--pr-line-height-normal);
+  color: var(--pr-color-text-tertiary);
+  text-wrap: pretty;
+}
+
+.pr-hero__actions {
+  display: flex;
+  gap: var(--pr-space-5);
+  margin-bottom: var(--pr-space-7);
+}
+
+/* Both actions size to content here rather than filling the row. */
+.pr-hero__cta {
+  width: auto;
+  padding-inline: var(--pr-space-9);
+}
+
+.pr-hero__secondary {
+  padding-inline: var(--pr-space-9);
+  height: var(--pr-layout-primary-control-height);
+  font-size: var(--pr-font-size-md);
+}
+
+.pr-hero__reassurance {
+  margin: 0;
+  font-size: var(--pr-font-size-sm);
+  color: var(--pr-color-text-muted);
+}
+
+.pr-hero__evidence {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-space-5);
+}
+
+.pr-hero__evidence .pr-compare {
+  aspect-ratio: var(--pr-layout-compare-aspect-ratio-wide);
+  /* Caps the box on a tall window so the figures stay in view. */
+  max-height: 60dvh;
+}
+
+.pr-hero__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+  border-radius: var(--pr-radius-md);
+  background: var(--pr-color-surface-2);
+  overflow: hidden;
+}
+
+.pr-hero__stat {
+  padding: var(--pr-space-6) var(--pr-space-7);
+}
+
+.pr-hero__stat + .pr-hero__stat {
+  border-inline-start: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+}
+
+.pr-hero__stat-label {
+  display: block;
+  margin-bottom: var(--pr-space-3);
+  font-size: var(--pr-font-size-xs);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-widest);
+  color: var(--pr-color-text-muted);
+  text-transform: uppercase;
+}
+
+.pr-hero__stat-label--accent {
+  color: var(--pr-color-accent-base);
+}
+
+.pr-hero__stat-value {
+  font-size: var(--pr-font-size-lg);
+  font-weight: var(--pr-font-weight-bold);
+  letter-spacing: var(--pr-letter-spacing-tight);
+  color: var(--pr-color-text-secondary);
+}
+
+.pr-hero__stat-value--accent {
+  color: var(--pr-color-text-primary);
+}
+
+/* --------------------------------------------------------- App shell ----- */
+
+.pr-desktop--app {
+  display: grid;
+  grid-template-columns: var(--pr-layout-sidebar-width) 1fr;
+  align-items: start;
+}
+
+.pr-sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  padding: var(--pr-space-6);
+  border-inline-end: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+}
+
+.pr-sidebar__mark {
+  padding: var(--pr-space-4) var(--pr-space-4) var(--pr-space-9);
+}
+
+.pr-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-space-2);
+}
+
+.pr-sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-space-5);
+  min-height: var(--pr-layout-min-touch-target);
+  padding-inline: var(--pr-space-5);
+  border: 0;
+  border-radius: var(--pr-radius-sm);
+  background: transparent;
+  font-family: var(--pr-font-family-sans);
+  font-size: var(--pr-font-size-md);
+  font-weight: var(--pr-font-weight-bold);
+  color: var(--pr-color-text-tertiary);
+  text-align: start;
+  cursor: pointer;
+}
+
+.pr-sidebar__item:hover {
+  color: var(--pr-color-text-primary);
+}
+
+.pr-sidebar__item--active {
+  background: var(--pr-color-surface-2);
+  color: var(--pr-color-text-primary);
+  cursor: default;
+}
+
+.pr-sidebar__dot {
+  width: var(--pr-space-3);
+  height: var(--pr-space-3);
+  border-radius: var(--pr-radius-sm);
+  background: var(--pr-color-border-strong);
+}
+
+.pr-sidebar__item--active .pr-sidebar__dot {
+  background: var(--pr-color-accent-base);
+}
+
+.pr-sidebar__count {
+  margin-inline-start: auto;
+  font-size: var(--pr-font-size-sm);
+  font-weight: var(--pr-font-weight-bold);
+  color: var(--pr-color-text-muted);
+}
+
+.pr-sidebar__storage {
+  margin-top: auto;
+  padding: var(--pr-space-6);
+  border: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+  border-radius: var(--pr-radius-md);
+  background: var(--pr-color-surface-2);
+}
+
+.pr-sidebar__using {
+  margin: 0 0 var(--pr-space-4);
+  font-size: var(--pr-font-size-md);
+  font-weight: var(--pr-font-weight-bold);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-sidebar__free {
+  margin: var(--pr-space-4) 0 var(--pr-space-6);
+  font-size: var(--pr-font-size-xs);
+  color: var(--pr-color-text-muted);
+}
+
+.pr-desktop__main {
+  min-width: 0;
+}
+
+.pr-desktop__header {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-space-6);
+  padding: var(--pr-space-6) var(--pr-space-9);
+  border-bottom: var(--pr-border-width-hairline) solid var(--pr-color-border-subtle);
+}
+
+.pr-desktop__title {
+  margin: 0;
+  font-size: var(--pr-font-size-2xl);
+  font-weight: var(--pr-font-weight-extrabold);
+  letter-spacing: var(--pr-letter-spacing-tight);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-desktop__meta {
+  margin: 0;
+  font-size: var(--pr-font-size-md);
+  color: var(--pr-color-text-muted);
+}
+
+.pr-desktop__cta {
+  width: auto;
+  margin-inline-start: auto;
+  padding-inline: var(--pr-space-8);
+}
+
+/* Auto-fill rather than a fixed column count, so the grid answers to the
+   window instead of to an assumption about laptop width. */
+.pr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--pr-space-7);
+  margin: 0;
+  padding: var(--pr-space-9);
+  list-style: none;
+}
+
+.pr-card {
+  border-radius: var(--pr-radius-md);
+  overflow: hidden;
+  background: var(--pr-color-surface-2);
+}
+
+.pr-card__frame {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: var(--pr-color-surface-media);
+}
+
+.pr-card__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pr-card__meta {
+  position: absolute;
+  inset-inline-start: var(--pr-space-5);
+  bottom: var(--pr-space-5);
+  padding: var(--pr-space-2) var(--pr-space-4);
+  border-radius: var(--pr-radius-sm);
+  background: var(--pr-scrim-caption);
+  font-size: var(--pr-font-size-xs);
+  font-weight: var(--pr-font-weight-bold);
+  color: var(--pr-color-text-primary);
+}
+
+.pr-card__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-space-5);
+  padding: var(--pr-space-5) var(--pr-space-6) var(--pr-space-6);
+}
+
+.pr-card__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.pr-card__name {
+  display: block;
+  font-size: var(--pr-font-size-md);
+  font-weight: var(--pr-font-weight-bold);
+  color: var(--pr-color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pr-card__when {
+  display: block;
+  margin-top: var(--pr-space-1);
+  font-size: var(--pr-font-size-sm);
+  color: var(--pr-color-text-muted);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

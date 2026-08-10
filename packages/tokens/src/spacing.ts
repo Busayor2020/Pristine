@@ -56,6 +56,31 @@ export const layout = {
    * pushing the primary action off screen.
    */
   compareAspectRatio: '179 / 202',
+
+  /**
+   * The same preview on a laptop.
+   *
+   * Square rather than portrait. At half a desktop column the phone ratio makes
+   * a 745px tall box that pushes the figures below the fold, which loses the
+   * comparison the screen exists to make.
+   */
+  compareAspectRatioWide: '1 / 1',
+
+  /**
+   * Where the desktop variants take over, in px.
+   *
+   * The phone is the product, so this is the only breakpoint and everything
+   * below it gets the phone layout. Set where the two column first run and the
+   * library sidebar stop being cramped rather than at a device width, because
+   * no device width means anything any more.
+   */
+  desktopBreakpoint: 960,
+
+  /** Sidebar on the desktop library. */
+  sidebarWidth: 240,
+
+  /** Widest the desktop content runs before it stops growing. */
+  desktopMaxWidth: 1280,
 } as const;
 
 export type SpaceToken = keyof typeof space;
