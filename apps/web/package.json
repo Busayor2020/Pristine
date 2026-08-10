@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/build-icons.mjs && vite",
+    "dev": "pnpm run deps && node scripts/build-icons.mjs && vite",
     "icons": "node scripts/build-icons.mjs",
-    "build": "node scripts/build-icons.mjs && tsc -b && vite build",
+    "deps": "pnpm --filter \"@pristine/web^...\" run build",
+    "build": "pnpm run deps && node scripts/build-icons.mjs && tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run"
   },

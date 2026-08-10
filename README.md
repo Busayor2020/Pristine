@@ -22,12 +22,23 @@ Then:
 pnpm install
 ```
 
-Build everything. Packages build before the app, because `apps/web/vite.config.ts`
-reads the manifest colours from `@pristine/tokens`:
+Build everything:
 
 ```bash
 pnpm build
 ```
+
+`apps/web` builds its own workspace dependencies first, via its `deps` script.
+That is deliberate rather than incidental: `vite.config.ts` reads the PWA
+manifest colours from `@pristine/tokens`, `scripts/build-icons.mjs` generates
+the icons from the same values, and `app.css` imports the generated
+`tokens.css`. All three need `packages/tokens` already built.
+
+Because the app builds its own dependencies, `pnpm build` works from the repo
+root **and** `pnpm run build` works from inside `apps/web`. That second path is
+the one a host like Vercel takes when its project root is set to the app
+directory, and relying on the caller to have built the packages first is how
+that breaks.
 
 Run the dev server:
 
