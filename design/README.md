@@ -46,6 +46,19 @@ That matters for the screen we build first. The comparison slider on
 out to be two VMAF points, that slider oversells and has to be redrawn from
 measured output rather than from the mock. See `experiments/README.md`.
 
+### Where the build deliberately differs from these renders
+
+If you are comparing a screen against its render and something is missing, check
+here before "fixing" it.
+
+| Render                                   | Divergence                                            | Why                                                                                                                                                 |
+| ---------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `28-desktop-library`                     | No **Batch** or **Brand kit** in the sidebar          | Seller mode is phase 2, and the brief says not to scaffold for it or add the interface for later. A disabled row is still an interface for later.   |
+| `17-batch-seller`, `18-brand-kit-seller` | Not built at all                                      | Same reason.                                                                                                                                        |
+| Every phone screen                       | No status bar, no home indicator                      | Phone frame artefacts of the mock, not app UI. A PWA draws neither.                                                                                 |
+| `03-result` and others                   | Eyebrow labels may wrap where the render has one line | The type scale floors at 12px for outdoor legibility, and the renders use 10.5px. Layouts share grid rows so the figures stay aligned when they do. |
+| Library items                            | "Ankara (wine)", not "Ankara [EM] wine"               | The renders predate the punctuation pass. `packages/copy` is the source of truth for wording.                                                       |
+
 ### They also still carry em dashes
 
 They are renders of the original export, so the on-screen text predates the
