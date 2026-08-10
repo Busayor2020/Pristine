@@ -1,4 +1,4 @@
-import { en } from '@pristine/ui';
+import { en } from '@pristine/copy';
 
 /**
  * Scaffold entry point, not a screen.

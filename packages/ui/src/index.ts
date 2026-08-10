@@ -1,9 +1,11 @@
 /**
  * @pristine/ui
  *
- * Shared presentation layer. Today it holds the copy catalogue; components
- * land here as screens get built, and they consume colour and sizing only
- * through @pristine/tokens.
+ * Shared components. Consumes @pristine/tokens for every colour and dimension,
+ * never a raw hex or a magic pixel value, and @pristine/copy for every string.
+ *
+ * Empty on purpose. Components arrive at stage 5, starting with the result
+ * screen, which is the one screen that sells the product. Nothing is scaffolded
+ * ahead of that.
  */
-export { en, format, placeholdersIn } from './copy/index.js';
-export type { Copy, CopyKey, CopyValues } from './copy/index.js';
+export {};

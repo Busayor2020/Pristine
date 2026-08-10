@@ -13,19 +13,29 @@ export type CopyValues = Readonly<Record<string, string | number>>;
 const PLACEHOLDER = /\{(\w+)\}/g;
 
 /**
- * Resolves a copy key, substituting any `{name}` placeholders.
+ * Substitutes `{name}` placeholders in an arbitrary template.
  *
  * An unresolved placeholder is left verbatim rather than blanked, so a missing
  * value shows up in review instead of silently producing "Uses about  of data".
  */
-export function format(key: CopyKey, values: CopyValues = {}): string {
-  return en[key].replace(PLACEHOLDER, (whole, name: string) => {
+export function interpolate(template: string, values: CopyValues = {}): string {
+  return template.replace(PLACEHOLDER, (whole, name: string) => {
     const value = values[name];
     return value === undefined ? whole : String(value);
   });
 }
 
+/** Resolves a copy key, substituting any `{name}` placeholders. */
+export function format(key: CopyKey, values: CopyValues = {}): string {
+  return interpolate(en[key], values);
+}
+
+/** The placeholder names a given template expects. */
+export function placeholdersInTemplate(template: string): string[] {
+  return [...template.matchAll(PLACEHOLDER)].map((match) => match[1] as string);
+}
+
 /** The placeholder names a given copy string expects. */
 export function placeholdersIn(key: CopyKey): string[] {
-  return [...en[key].matchAll(PLACEHOLDER)].map((match) => match[1] as string);
+  return placeholdersInTemplate(en[key]);
 }

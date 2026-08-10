@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { en, type CopyKey } from './en.js';
-import { format, placeholdersIn } from './format.js';
+import { format, interpolate, placeholdersIn } from './format.js';
+import { unverifiedCopy } from './unverified.js';
 
 const entries = Object.entries(en) as [CopyKey, string][];
 
@@ -24,11 +25,6 @@ describe('copy catalogue', () => {
     expect(new Set(seen).size).toBe(seen.length);
   });
 
-  /**
-   * The house rule, asserted against the shipped strings rather than trusted.
-   * The ESLint rule catches this at author time; this catches it if the rule is
-   * ever disabled for the file.
-   */
   it('contains no em dash', () => {
     const emDash = String.fromCharCode(0x2014);
     for (const [key, value] of entries) {
@@ -62,6 +58,54 @@ describe('copy catalogue', () => {
   });
 });
 
+describe('claim safety', () => {
+  /**
+   * We cannot bypass WhatsApp compression, only reduce what it has to destroy.
+   * Saying otherwise is false and invites a complaint from a company with
+   * lawyers.
+   */
+  it('never claims we defeat compression', () => {
+    const banned =
+      /\b(bypass|beat|beats|defeat|defeats|disable|disables|uncompressed|lossless)\b|avoid compression|no compression|original quality/i;
+    for (const [key, value] of entries) {
+      expect(value, `${key} makes a banned compression claim`).not.toMatch(banned);
+    }
+  });
+
+  /**
+   * The photo-as-video technique is unverified. Until /experiments/results.md
+   * exists, no shipped string may assert that it produces a quality gain. The
+   * strings that did live in ./unverified.ts instead.
+   */
+  it('asserts no unmeasured quality gain', () => {
+    const claims =
+      /gentler|holds up better|more of your detail|survives the upload|why this works/i;
+    for (const [key, value] of entries) {
+      expect(value, `${key} asserts an unmeasured quality gain`).not.toMatch(claims);
+    }
+  });
+
+  it('keeps the quarantined strings out of the shipped catalogue', () => {
+    for (const key of Object.keys(unverifiedCopy)) {
+      expect(Object.keys(en), `${key} leaked into en`).not.toContain(key);
+    }
+  });
+
+  it('never implies affiliation with WhatsApp', () => {
+    for (const [key, value] of entries) {
+      expect(value, `${key} implies affiliation`).not.toMatch(
+        /official|partner|partnership|in association|endorsed/i,
+      );
+    }
+  });
+
+  /** The brief fixes these two labels exactly. */
+  it('keeps the comparison labels verbatim', () => {
+    expect(en['compare.before']).toBe('WhatsApp would send');
+    expect(en['compare.after']).toBe('Pristine sends');
+  });
+});
+
 describe('format', () => {
   it('substitutes named placeholders', () => {
     expect(format('gallery.selected', { count: 3 })).toBe('3 selected');
@@ -85,6 +129,10 @@ describe('format', () => {
   it('reports the placeholders a string expects', () => {
     expect(placeholdersIn('sheet.tooLarge.body')).toEqual(['size', 'needed', 'available']);
     expect(placeholdersIn('preset.title')).toEqual([]);
+  });
+
+  it('interpolates an arbitrary template', () => {
+    expect(interpolate('{a} then {b}', { a: 'one', b: 'two' })).toBe('one then two');
   });
 
   it('never leaves a placeholder unresolved when every value is supplied', () => {

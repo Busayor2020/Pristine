@@ -14,6 +14,10 @@
  * layout comments. Every one has been replaced with a period, comma, colon or
  * parenthesis chosen for what that specific sentence was doing. None became a
  * hyphen. MIGRATION.md lists all of them with the before and after.
+ *
+ * Nothing in this file may assert a quality gain we have not measured. The
+ * strings that did are quarantined in `./unverified.ts` until
+ * `/experiments/results.md` exists. A test enforces this.
  */
 
 export const en = {
@@ -55,24 +59,20 @@ export const en = {
   'firstRun.secondary': 'See how it works',
   'firstRun.reassurance': 'No account. Nothing leaves your phone.',
 
-  // Before and after comparison
+  // Before and after comparison. These two strings are fixed by the brief and
+  // must not be reworded. The design export also carried uppercase duplicates
+  // for the result screen; those are a text-transform concern, not a second
+  // string, so they are gone.
   'compare.before': 'WhatsApp would send',
   'compare.after': 'Pristine sends',
-  'compare.beforeLabel': 'WHATSAPP WOULD SEND',
-  'compare.afterLabel': 'PRISTINE SENDS',
   'compare.hint': 'Drag to compare, or tap to flip',
 
   // Education card
   'edu.eyebrow': 'ONE THING TO KNOW',
   'edu.title': 'Your photo comes back as a short clip.',
   'edu.subtitle': "That's on purpose. Here's why.",
-  // Was: "...handling Status media - one for pictures, one for video."
-  'edu.step1': 'WhatsApp has two ways of handling Status media: one for pictures, one for video.',
-  'edu.step2':
-    'The video one is gentler with fine detail. So Pristine turns your photo into a {dimensions} clip, a few seconds long.',
-  // Was: "Nobody watching can tell - except it holds up better."
-  'edu.step3':
-    'On Status it still reads as a photo post. Nobody watching can tell, except it holds up better.',
+  // edu.step1 through edu.step3 are quarantined in ./unverified.ts: they state
+  // the photo-as-video hypothesis as fact.
   'edu.note':
     'Prefer to post a still? Turn clips off in {settingsPath}. Your photo will still be prepared, just not as sharp.',
   'edu.settingsPath': 'Settings › Media',
@@ -137,9 +137,7 @@ export const en = {
   // Was: "...of data to post - roughly 14s on 4G."
   'result.dataNote': 'Uses about {size} of data to post, roughly {time} on 4G.',
   'result.explainTitle': 'Your photo is now a {seconds}-second clip',
-  'result.explainBody':
-    'WhatsApp is gentler with Status video than with still pictures, so more of your detail survives the upload. To anyone watching, it still reads as a photo post.',
-  'result.why': 'Why this works',
+  // result.explainBody and result.why are quarantined in ./unverified.ts.
   'result.cta': 'Post or save',
 
   // Export

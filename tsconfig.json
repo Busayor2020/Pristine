@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "./packages/tokens" },
+    { "path": "./packages/copy" },
     { "path": "./packages/ui" },
     { "path": "./packages/encoder" },
     { "path": "./apps/web" },

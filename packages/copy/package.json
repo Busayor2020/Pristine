@@ -1,5 +1,5 @@
 {
-  "name": "@pristine/ui",
+  "name": "@pristine/copy",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,6 +7,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./unverified": {
+      "types": "./dist/unverified.d.ts",
+      "default": "./dist/unverified.js"
     }
   },
   "files": [
@@ -15,18 +19,6 @@
   "scripts": {
     "build": "tsc -b",
     "test": "vitest run"
-  },
-  "dependencies": {
-    "@pristine/copy": "workspace:*",
-    "@pristine/tokens": "workspace:*"
-  },
-  "peerDependencies": {
-    "react": "^18.3.1"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "typescript": "^5.7.2",
