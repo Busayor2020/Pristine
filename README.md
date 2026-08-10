@@ -35,6 +35,25 @@ Run the dev server:
 pnpm dev
 ```
 
+### Reaching a screen directly
+
+There is no router. The flow is linear, so navigation is a small state machine
+in `apps/web/src/navigation.ts`. To open any screen without walking to it, add
+`?screen=` to the URL:
+
+```
+http://localhost:5173/?screen=split
+```
+
+Valid values are `first-run`, `education`, `permission`, `entry`, `preset`,
+`processing`, `result`, `export`, `split`, `library` and `settings`. Anything
+else falls back to first run rather than blanking the app.
+
+This is a review affordance, not a routing scheme, and it is the only way to
+reach states the sample data cannot produce. `split` is the clearest case: it
+needs a video longer than one Status post, and the harness only carries a
+photo. The design's own prototype did the same thing with `?s=`.
+
 ### Checks
 
 ```bash
