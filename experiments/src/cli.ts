@@ -21,7 +21,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { FitMode } from '@pristine/encoder';
 import { capabilities } from './ffmpeg.js';
-import { SYNTHETIC_FIXTURES, listFixtures, synthesise } from './fixtures.js';
+import {
+  SYNTHETIC_FIXTURES,
+  listFixtures,
+  listUndecodable,
+  synthesise,
+  undecodableReason,
+} from './fixtures.js';
 import { generate } from './generate.js';
 import { findReturnedFile, readManifest, writeManifest } from './manifest.js';
 import { measureReturned, type CandidateResult } from './measure.js';
@@ -81,6 +87,18 @@ const commands: Record<string, Command> = {
           ? `available: ${available.join(', ')}`
           : 'no fixtures yet. Run `synth`, or drop a phone photo into fixtures/.',
       );
+      // A HEIC sitting in fixtures/ looks like a fixture to everyone except
+      // ffmpeg. Say so, rather than reporting an empty directory.
+      for (const skipped of listUndecodable(DIRS.fixtures)) {
+        console.error(`\nskipped ${skipped}: ${undecodableReason(skipped)}`);
+      }
+      process.exitCode = 1;
+      return;
+    }
+
+    const unreadable = undecodableReason(name);
+    if (unreadable !== undefined) {
+      console.error(unreadable);
       process.exitCode = 1;
       return;
     }

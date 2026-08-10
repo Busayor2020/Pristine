@@ -86,7 +86,30 @@ export async function synthesise(fixture: SyntheticFixture, outFile: string): Pr
   ]);
 }
 
-const IMAGE_EXT = new Set(['.png', '.jpg', '.jpeg', '.webp', '.heic', '.tif', '.tiff']);
+/**
+ * What the bundled ffmpeg can actually decode. Verified against
+ * `ffmpeg -decoders` rather than assumed, because a fixture that fails to
+ * decode halfway through a run wastes the posting pass, not just the command.
+ */
+const IMAGE_EXT = new Set(['.png', '.jpg', '.jpeg', '.webp', '.tif', '.tiff', '.jp2', '.ppm']);
+
+/**
+ * Formats a phone might hand over that this build cannot read.
+ *
+ * ffmpeg-static ships without libheif and without libjxl, so HEIC (the iPhone
+ * default) and JPEG XL both fail. Raw is out too: no libraw. These are named
+ * explicitly so the error tells the user what to do instead of "no fixtures".
+ */
+const UNDECODABLE_EXT = new Set([
+  '.heic',
+  '.heif',
+  '.avif',
+  '.jxl',
+  '.dng',
+  '.raw',
+  '.cr2',
+  '.nef',
+]);
 
 /** Every usable fixture currently sitting in the fixtures directory. */
 export function listFixtures(dir: string): string[] {
@@ -94,6 +117,29 @@ export function listFixtures(dir: string): string[] {
   return fs
     .readdirSync(dir)
     .filter((name) => IMAGE_EXT.has(path.extname(name).toLowerCase()))
+    .sort();
+}
+
+/**
+ * Explains why a file in fixtures/ was ignored, when the reason is the format
+ * rather than the file being absent.
+ */
+export function undecodableReason(file: string): string | undefined {
+  const ext = path.extname(file).toLowerCase();
+  if (!UNDECODABLE_EXT.has(ext)) return undefined;
+  return (
+    `${ext} cannot be decoded by the bundled ffmpeg (no libheif, no libjxl, no libraw). ` +
+    `Convert it to PNG or JPEG at full resolution first, on the phone or with a tool ` +
+    `that does not downscale.`
+  );
+}
+
+/** Files sitting in fixtures/ that were skipped because of their format. */
+export function listUndecodable(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((name) => UNDECODABLE_EXT.has(path.extname(name).toLowerCase()))
     .sort();
 }
 
