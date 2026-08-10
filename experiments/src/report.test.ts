@@ -12,7 +12,8 @@ const manifest: Manifest = {
     file: 'fixtures/sample.png',
     width: 1440,
     height: 2560,
-    synthetic: false,
+    provenance: 'camera',
+    make: 'TECNO',
   },
   reference: { file: 'candidates/reference.png', width: 1080, height: 1920, fit: 'fit' },
   candidates: MATRIX.map((arm) => ({
@@ -82,15 +83,35 @@ describe('report body', () => {
   });
 
   it('warns loudly when the fixture is synthetic', () => {
-    const synthetic: Manifest = { ...manifest, fixture: { ...manifest.fixture, synthetic: true } };
+    const synthetic: Manifest = {
+      ...manifest,
+      fixture: { ...manifest.fixture, provenance: 'synthetic' },
+    };
     const report = buildReport(synthetic, [result('02', 75), result('04', 82)]);
     expect(report).toContain('synthetic fixture');
     expect(report).toContain('directional only');
   });
 
-  it('does not warn about synthetic data for a real fixture', () => {
+  /**
+   * The dangerous case. Stock imagery is not synthetic, so without this it
+   * would produce a report that reads as a real result while measuring an
+   * already denoised and sharpened image.
+   */
+  it('warns when the fixture carries no camera EXIF', () => {
+    const stock: Manifest = {
+      ...manifest,
+      fixture: { ...manifest.fixture, provenance: 'unknown', make: undefined },
+    };
+    const report = buildReport(stock, [result('02', 75), result('04', 82)]);
+    expect(report).toContain('no camera EXIF');
+    expect(report).toContain('directional only');
+  });
+
+  it('does not caveat a real camera fixture, and names the maker', () => {
     const report = buildReport(manifest, [result('02', 75), result('04', 82)]);
     expect(report).not.toContain('synthetic fixture');
+    expect(report).not.toContain('no camera EXIF');
+    expect(report).toContain('camera (TECNO)');
   });
 
   it('carries the limitations and the gate on stage 4', () => {

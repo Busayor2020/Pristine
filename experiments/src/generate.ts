@@ -13,7 +13,7 @@ import type { FitMode } from '@pristine/encoder';
 import { probe, run } from './ffmpeg.js';
 import { HELD_CONSTANT, MATRIX } from './matrix.js';
 import type { Candidate, Manifest } from './manifest.js';
-import { isSynthetic } from './fixtures.js';
+import { readProvenance } from './fixtures.js';
 
 const { width: W, height: H } = STATUS_FRAME;
 
@@ -128,6 +128,24 @@ export async function generate(options: GenerateOptions): Promise<Manifest> {
     );
   }
 
+  const provenance = readProvenance(fixture);
+  if (provenance.provenance === 'unknown') {
+    console.warn(
+      `\n  WARNING: ${path.basename(fixture)} carries no camera EXIF.\n` +
+        `  It is stock, a screenshot, an export, or a file that has already been\n` +
+        `  through a processing pipeline. Those are denoised and sharpened before\n` +
+        `  we see them, so measuring one answers a different question than the one\n` +
+        `  this experiment asks. The report will say so.\n`,
+    );
+  } else if (provenance.provenance === 'camera') {
+    console.warn(
+      `\n  WARNING: ${path.basename(fixture)} came from a ${provenance.make}, not a phone.\n` +
+        `  Real sensor output, but a far cleaner sensor than this audience shoots on.\n` +
+        `  Its noise floor is below a mid-range phone's, which flatters every arm and\n` +
+        `  understates the damage we are trying to measure. The report will say so.\n`,
+    );
+  }
+
   fs.mkdirSync(outDir, { recursive: true });
   const referenceFile = path.join(outDir, 'reference.png');
   await renderReference(fixture, referenceFile, fit);
@@ -176,7 +194,8 @@ export async function generate(options: GenerateOptions): Promise<Manifest> {
       file: path.relative(process.cwd(), fixture).split(path.sep).join('/'),
       width: fixtureInfo.width,
       height: fixtureInfo.height,
-      synthetic: isSynthetic(fixture),
+      provenance: provenance.provenance,
+      ...(provenance.make === undefined ? {} : { make: provenance.make }),
     },
     reference: {
       file: path.relative(process.cwd(), referenceFile).split(path.sep).join('/'),

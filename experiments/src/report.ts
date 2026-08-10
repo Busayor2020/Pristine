@@ -43,16 +43,37 @@ export function buildReport(manifest: Manifest, results: readonly CandidateResul
   lines.push(
     `Reference: ${manifest.reference.width}x${manifest.reference.height}, ${manifest.reference.fit} mode`,
   );
+  lines.push(
+    `Source: ${manifest.fixture.provenance}${manifest.fixture.make === undefined ? '' : ` (${manifest.fixture.make})`}`,
+  );
   lines.push(`Generated: ${manifest.createdAt}`);
   lines.push(`Scored: ${scored.length} of ${manifest.candidates.length} arms`);
   lines.push('');
 
-  if (manifest.fixture.synthetic) {
+  if (manifest.fixture.provenance === 'synthetic') {
     lines.push('> **This run used a synthetic fixture.** Synthetic charts have exact ground');
     lines.push('> truth and are reproducible, but they carry no sensor noise and no real');
     lines.push('> scene statistics, and noise is a large part of what compression destroys.');
     lines.push('> Treat any result below as directional only. The bet is not settled until');
     lines.push('> this runs on real phone photographs.');
+    lines.push('');
+  }
+
+  if (manifest.fixture.provenance === 'camera') {
+    lines.push(`> **This fixture came from a ${manifest.fixture.make ?? 'dedicated camera'},`);
+    lines.push('> not a phone.** Real sensor output, but a far cleaner sensor than this');
+    lines.push('> audience shoots on. Its noise floor sits below a mid-range phone, which');
+    lines.push('> flatters every arm and understates exactly the damage this experiment');
+    lines.push('> measures. Treat any result below as directional only.');
+    lines.push('');
+  }
+
+  if (manifest.fixture.provenance === 'unknown') {
+    lines.push('> **This fixture carries no camera EXIF.** It is stock, a screenshot, an');
+    lines.push('> export, or a file that has already been through a processing pipeline.');
+    lines.push('> Such images arrive denoised and sharpened, so what survives compression');
+    lines.push('> is not what survives for a photo straight off a phone sensor. Treat any');
+    lines.push('> result below as directional only.');
     lines.push('');
   }
 

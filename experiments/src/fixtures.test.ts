@@ -8,6 +8,7 @@ import {
   isSynthetic,
   listFixtures,
   listUndecodable,
+  readProvenance,
   undecodableReason,
 } from './fixtures.js';
 
@@ -76,5 +77,65 @@ describe('format support', () => {
 
   it('says nothing about a format that works', () => {
     expect(undecodableReason('shot.jpg')).toBeUndefined();
+  });
+});
+
+describe('readProvenance', () => {
+  const write = (name: string, contents: Buffer | string) => {
+    const file = path.join(dir, name);
+    fs.writeFileSync(file, contents);
+    return file;
+  };
+
+  it('knows its own charts without reading them', () => {
+    expect(readProvenance(path.join(dir, 'detail.png')).provenance).toBe('synthetic');
+  });
+
+  /**
+   * The case that matters. Stock imagery is not synthetic, so without this it
+   * would be treated as a real fixture and produce an uncaveated report.
+   */
+  it('flags a file with no EXIF as unknown', () => {
+    const file = write('stock.jpg', Buffer.from('\xff\xd8\xff\xe0JFIF just pixels', 'latin1'));
+    expect(readProvenance(file).provenance).toBe('unknown');
+  });
+
+  it('flags EXIF without a recognisable maker as unknown', () => {
+    const file = write(
+      'edited.jpg',
+      Buffer.from('\xff\xd8\xff\xe1Exif\0\0Adobe Photoshop', 'latin1'),
+    );
+    expect(readProvenance(file).provenance).toBe('unknown');
+  });
+
+  it('recognises a phone the audience actually carries', () => {
+    const file = write('IMG_0001.jpg', Buffer.from('\xff\xd8\xff\xe1Exif\0\0TECNO KI5q', 'latin1'));
+    expect(readProvenance(file)).toEqual({ provenance: 'phone', make: 'TECNO' });
+  });
+
+  it('recognises an iPhone', () => {
+    const file = write(
+      'IMG_0002.jpg',
+      Buffer.from('\xff\xd8\xff\xe1Exif\0\0Apple iPhone 13', 'latin1'),
+    );
+    expect(readProvenance(file)).toEqual({ provenance: 'phone', make: 'Apple' });
+  });
+
+  /**
+   * A DSLR is real sensor output but the wrong sensor. Its noise floor sits
+   * below a mid-range phone, so it flatters every arm and understates the
+   * damage the experiment exists to measure.
+   */
+  it('separates a dedicated camera from a phone', () => {
+    const file = write(
+      'IMG_0003.jpg',
+      Buffer.from('\xff\xd8\xff\xe1Exif\0\0Canon EOS R6', 'latin1'),
+    );
+    expect(readProvenance(file)).toEqual({ provenance: 'camera', make: 'Canon' });
+  });
+
+  it('reads a short file without falling over', () => {
+    const file = write('tiny.jpg', 'x');
+    expect(readProvenance(file).provenance).toBe('unknown');
   });
 });

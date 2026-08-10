@@ -17,7 +17,13 @@ afterEach(() => {
 const manifest: Manifest = {
   version: 1,
   createdAt: '2026-08-10T00:00:00.000Z',
-  fixture: { name: 'x', file: 'fixtures/x.png', width: 1440, height: 2560, synthetic: true },
+  fixture: {
+    name: 'x',
+    file: 'fixtures/x.png',
+    width: 1440,
+    height: 2560,
+    provenance: 'synthetic',
+  },
   reference: { file: 'candidates/reference.png', width: 1080, height: 1920, fit: 'fit' },
   candidates: [
     {

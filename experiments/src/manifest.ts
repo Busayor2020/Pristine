@@ -57,7 +57,13 @@ export interface Manifest {
     readonly file: string;
     readonly width: number;
     readonly height: number;
-    readonly synthetic: boolean;
+    /**
+     * Recorded rather than inferred later, because a result is only as good as
+     * what it was measured on, and that fact has to survive to the report.
+     */
+    readonly provenance: 'synthetic' | 'phone' | 'camera' | 'unknown';
+    /** EXIF Make, when there is one. */
+    readonly make?: string;
   };
   /**
    * The fixture rendered into the Status frame losslessly. Every candidate is

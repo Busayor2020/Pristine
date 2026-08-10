@@ -147,3 +147,85 @@ export function listUndecodable(dir: string): string[] {
 export function isSynthetic(file: string): boolean {
   return SYNTHETIC_FIXTURES.some((f) => path.basename(file, path.extname(file)) === f.name);
 }
+
+/**
+ * Where a fixture came from, as far as we can tell.
+ *
+ *   synthetic  one of our generated charts
+ *   phone      EXIF names a phone maker. The target device, and the only
+ *              provenance that produces a decision-grade result
+ *   camera     EXIF names a dedicated camera. Real sensor output, but a much
+ *              cleaner sensor than anything this audience shoots on
+ *   unknown    no camera metadata: stock, a screenshot, an export, or a file
+ *              already through a processing pipeline
+ */
+export type Provenance = 'synthetic' | 'phone' | 'camera' | 'unknown';
+
+/**
+ * Phone makers, as they appear in EXIF `Make`.
+ *
+ * Weighted towards what this product's users actually carry rather than
+ * towards what a photography forum would list.
+ */
+const PHONE_MAKERS = [
+  'Apple',
+  'samsung',
+  'Samsung',
+  'Xiaomi',
+  'Redmi',
+  'OPPO',
+  'vivo',
+  'realme',
+  'HUAWEI',
+  'HONOR',
+  'TECNO',
+  'Infinix',
+  'itel',
+  'Google',
+  'OnePlus',
+  'motorola',
+  'Nokia',
+];
+
+/**
+ * Dedicated cameras.
+ *
+ * Kept separate because a full frame sensor is not the device under test. Its
+ * noise floor is far below a mid-range phone's, so it flatters every arm
+ * equally and understates exactly the damage this experiment is trying to
+ * measure.
+ */
+const CAMERA_MAKERS = ['Canon', 'NIKON', 'Nikon', 'SONY', 'FUJIFILM', 'PENTAX', 'OLYMPUS', 'Leica'];
+
+/**
+ * Reads provenance from the file head.
+ *
+ * A heuristic, not a guarantee: EXIF can be stripped from a real photo, and it
+ * can be forged. It exists to catch the common and costly mistake of measuring
+ * stock imagery, which is already denoised and sharpened and therefore answers
+ * a different question than the one this experiment asks.
+ */
+export function readProvenance(file: string): { provenance: Provenance; make?: string } {
+  if (isSynthetic(file)) return { provenance: 'synthetic' };
+
+  // EXIF lives in the first APP1 segment, well inside the first 128KB.
+  const head = Buffer.alloc(128 * 1024);
+  const handle = fs.openSync(file, 'r');
+  let read = 0;
+  try {
+    read = fs.readSync(handle, head, 0, head.length, 0);
+  } finally {
+    fs.closeSync(handle);
+  }
+
+  const text = head.subarray(0, read).toString('latin1');
+  if (!text.includes('Exif\0\0')) return { provenance: 'unknown' };
+
+  const phone = PHONE_MAKERS.find((maker) => text.includes(maker));
+  if (phone !== undefined) return { provenance: 'phone', make: phone };
+
+  const camera = CAMERA_MAKERS.find((maker) => text.includes(maker));
+  if (camera !== undefined) return { provenance: 'camera', make: camera };
+
+  return { provenance: 'unknown' };
+}
