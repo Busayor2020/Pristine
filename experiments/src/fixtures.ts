@@ -63,7 +63,8 @@ export const SYNTHETIC_FIXTURES: readonly SyntheticFixture[] = [
   },
   {
     name: 'noise',
-    stresses: 'Uniform noise over flat grey. Isolates how noise is smeared, but it is not sensor grain.',
+    stresses:
+      'Uniform noise over flat grey. Isolates how noise is smeared, but it is not sensor grain.',
     graph: `color=c=0x3A3A3A:size=${FIXTURE_SIZE.width}x${FIXTURE_SIZE.height}:rate=1:duration=1,noise=alls=42:allf=t+u`,
   },
   {

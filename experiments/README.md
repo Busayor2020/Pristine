@@ -83,13 +83,49 @@ version. Note them in the results afterwards.
 pnpm exp status
 ```
 
-**5. Score it.**
+**5. Record the conditions.**
+
+```bash
+cp conditions.example.json conditions.json
+```
+
+Fill in the device, OS and WhatsApp version. None of it is recoverable later,
+and a score with no handset attached cannot be compared to anything: WhatsApp
+changes its pipeline by app version and behaves differently by device. The
+ffmpeg build is captured automatically.
+
+This is read at `compare` time, not at `generate` time, so filling it in after
+the posting pass and re-running `compare` attaches it.
+
+**6. Score it.**
 
 ```bash
 pnpm exp compare
 ```
 
-Writes `results.md`. Partial runs are fine and are marked as partial.
+Writes `results/<fixture>-<fit>.md` and refreshes `results.md`, which is the
+index over every run. Partial runs are fine and are marked as partial.
+
+**7. Put the run away before starting the next fixture.**
+
+```bash
+pnpm exp archive
+```
+
+Moves `candidates/` and `returned/` into `runs/<timestamp>-<fixture>/` and
+leaves the working directories clear.
+
+## Guard rails
+
+`generate` refuses to overwrite `candidates/` while `returned/` holds files
+that have not been scored. Getting nine files through Status by hand is the
+expensive part of this experiment, and silently discarding a posting session is
+the one mistake the harness can prevent. Override with `--force` if you really
+do mean to throw it away.
+
+`results.md` always exists and always means "the evidence". Before any run it
+says the stage 4 gate is closed. `pnpm exp reindex` rebuilds it from whatever
+reports are on disk.
 
 ## How scoring works
 

@@ -39,7 +39,14 @@ import {
 } from './manifest.js';
 import { measureReturned, type CandidateResult } from './measure.js';
 import { buildReport } from './report.js';
-import { RESULTS_DIR, RESULTS_INDEX, archiveRun, buildIndex, readRuns, reportName } from './runs.js';
+import {
+  RESULTS_DIR,
+  RESULTS_INDEX,
+  archiveRun,
+  buildIndex,
+  readRuns,
+  reportName,
+} from './runs.js';
 
 const ROOT = path.resolve(fileURLToPath(import.meta.url), '../..');
 const DIRS = {

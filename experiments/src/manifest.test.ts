@@ -84,9 +84,10 @@ describe('readConditions', () => {
    * PowerShell both write a UTF-8 BOM that JSON.parse rejects.
    */
   it('reads a file saved with a byte order mark', () => {
+    const bom = String.fromCharCode(0xfeff);
     fs.writeFileSync(
       path.join(dir, CONDITIONS_NAME),
-      `﻿${JSON.stringify({ device: 'TECNO Spark 10 Pro' })}`,
+      `${bom}${JSON.stringify({ device: 'TECNO Spark 10 Pro' })}`,
       'utf8',
     );
     expect(readConditions(dir, '6.1.1').device).toBe('TECNO Spark 10 Pro');

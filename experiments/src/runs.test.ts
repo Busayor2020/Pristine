@@ -44,7 +44,8 @@ describe('reportName', () => {
 });
 
 describe('verdictFrom', () => {
-  const report = (verdict: string) => `# Experiment results\n\n## Verdict\n\n${verdict}\n\n## Scores\n`;
+  const report = (verdict: string) =>
+    `# Experiment results\n\n## Verdict\n\n${verdict}\n\n## Scores\n`;
 
   it('picks the bet line, not the resize line that precedes it', () => {
     const text = report(
@@ -56,9 +57,9 @@ describe('verdictFrom', () => {
   });
 
   it('reads a loss', () => {
-    expect(verdictFrom(report('**The photo-as-video bet does not hold on this fixture.**'))).toMatch(
-      /does not hold/,
-    );
+    expect(
+      verdictFrom(report('**The photo-as-video bet does not hold on this fixture.**')),
+    ).toMatch(/does not hold/);
   });
 
   it('reads a tie', () => {

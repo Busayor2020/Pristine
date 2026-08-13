@@ -78,8 +78,14 @@ export const CONDITIONS_NAME = 'conditions.json';
  * hand-edited on exactly those machines, so stripping it is the difference
  * between a working run and a baffling one.
  */
+const BYTE_ORDER_MARK = 0xfeff;
+
 function parseJsonFile<T>(file: string): T {
-  return JSON.parse(fs.readFileSync(file, 'utf8').replace(/^﻿/, '')) as T;
+  const text = fs.readFileSync(file, 'utf8');
+  // Built from its code point rather than typed, so the character never appears
+  // literally in source where a linter would flag it as irregular whitespace.
+  const body = text.charCodeAt(0) === BYTE_ORDER_MARK ? text.slice(1) : text;
+  return JSON.parse(body) as T;
 }
 
 export interface Manifest {
