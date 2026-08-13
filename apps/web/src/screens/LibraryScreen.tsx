@@ -14,7 +14,8 @@ export interface LibraryScreenProps {
   readonly items: readonly LibraryItem[];
   readonly preparedBytes: number;
   readonly originalsBytes: number;
-  readonly freeBytes: number;
+  /** Undefined where the browser will not report it. */
+  readonly freeBytes?: number | undefined;
   readonly onOpenItem: (id: string) => void;
   readonly onFreeUpSpace: () => void;
   readonly onSettings: () => void;
@@ -39,7 +40,10 @@ export function LibraryScreen({
   onPrepare,
 }: LibraryScreenProps) {
   const used = preparedBytes + originalsBytes;
-  const total = used + freeBytes;
+  // With a known quota the bar answers "how much of my phone is this", which is
+  // the question someone short of space is asking. Without one it can only show
+  // the two parts against each other, which is still worth drawing.
+  const total = freeBytes === undefined ? Math.max(used, 1) : used + freeBytes;
 
   if (items.length === 0) {
     return (
@@ -71,7 +75,11 @@ export function LibraryScreen({
       <div className="pr-screen__scroll">
         <StorageMeter
           headline={format('library.usage', { size: formatBytes(used) })}
-          free={format('library.free', { size: formatBytes(freeBytes) })}
+          free={
+            freeBytes === undefined
+              ? undefined
+              : format('library.free', { size: formatBytes(freeBytes) })
+          }
           segments={[
             {
               label: en['library.prepared'],

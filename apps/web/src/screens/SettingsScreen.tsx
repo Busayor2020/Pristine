@@ -9,6 +9,7 @@ export interface SettingsScreenProps {
   readonly onClipsChange: (enabled: boolean) => void;
   readonly keepOriginalsDays: number;
   readonly usedBytes: number;
+  readonly onRetentionChange: (days: number) => void;
   readonly language: string;
   readonly version: string;
   readonly onBack: () => void;
@@ -41,6 +42,7 @@ export function SettingsScreen(props: SettingsScreenProps) {
     onBack,
     onEditPreset,
     onEditFit,
+    onRetentionChange,
     onEditRetention,
     onFreeUpSpace,
     onEditLanguage,
@@ -79,7 +81,15 @@ export function SettingsScreen(props: SettingsScreenProps) {
             title={en['settings.keepOriginals']}
             value={format('settings.keepOriginalsValue', { days: keepOriginalsDays })}
             numericValue
-            onClick={onEditRetention}
+            // Cycles rather than opening a picker, which the design does not
+            // have. Tapping through four windows is a smaller lie than a screen
+            // that does nothing, and the setting now really prunes.
+            onClick={() => {
+              const windows = [7, 14, 30, 90];
+              const next = windows[(windows.indexOf(keepOriginalsDays) + 1) % windows.length];
+              onRetentionChange(next ?? 7);
+              onEditRetention();
+            }}
           />
           <SettingsRow
             title={en['action.freeUpSpace']}

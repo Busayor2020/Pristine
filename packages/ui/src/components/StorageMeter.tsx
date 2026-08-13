@@ -8,7 +8,14 @@ export interface StorageSegment {
 
 export interface StorageMeterProps {
   readonly headline: string;
-  readonly free: string;
+  /**
+   * Omit when the browser will not report free space.
+   *
+   * Firefox and some WebViews leave quota out of `storage.estimate()`. The line
+   * is dropped rather than shown as zero or as a dash, because a storage screen
+   * that states a number it does not have is worse than one that says less.
+   */
+  readonly free?: string | undefined;
   readonly segments: readonly StorageSegment[];
 }
 
@@ -25,7 +32,7 @@ export function StorageMeter({ headline, free, segments }: StorageMeterProps) {
     <div className="pr-storage">
       <div className="pr-storage__header">
         <span className="pr-storage__headline">{headline}</span>
-        <span className="pr-storage__free pr-numeric">{free}</span>
+        {free !== undefined && <span className="pr-storage__free pr-numeric">{free}</span>}
       </div>
 
       <div className="pr-storage__bar">

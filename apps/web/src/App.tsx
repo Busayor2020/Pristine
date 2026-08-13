@@ -1,11 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
-import type { FitMode, PresetName } from '@pristine/encoder';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { PresetName } from '@pristine/encoder';
 import { STATUS_FRAME } from '@pristine/encoder';
 import { en } from '@pristine/copy';
-import { OfflineBanner, OfflineIcon, type LibraryItem } from '@pristine/ui';
+import {
+  OfflineBanner,
+  OfflineIcon,
+  formatBytes,
+  formatDuration,
+  type LibraryItem,
+} from '@pristine/ui';
 import { useNavigation } from './navigation.js';
 import { useIsDesktop } from './useMediaQuery.js';
 import { useMediaPicker } from './useMediaPicker.js';
+import { useStore } from './useStore.js';
+import { isAvailable, putItem } from './storage/db.js';
 import type { MediaRejection } from './media.js';
 import { SheetHost, type SheetName } from './sheets.js';
 import { DesktopFirstRunScreen } from './screens/DesktopFirstRunScreen.js';
@@ -54,6 +62,14 @@ const PREPARED = {
   durationSeconds: 6,
 };
 
+/**
+ * Placeholder library, shown only behind the `?screen=` review affordance.
+ *
+ * The design renders stay reviewable without six fake Ankara entries appearing
+ * in a real user's library. A fresh profile gets the empty state, which was
+ * built from `design/screens/pristine-14-library-empty.png` and was unreachable
+ * until now.
+ */
 const SAMPLE_LIBRARY: readonly LibraryItem[] = [
   { id: '1', name: en['sample.library.1'], when: '2 days ago' },
   { id: '2', name: en['sample.library.2'], when: '2 days ago' },
@@ -71,6 +87,19 @@ const SAMPLE_LIBRARY: readonly LibraryItem[] = [
 const FAKE_ENCODE_MS = 2600;
 
 /**
+ * "2 days ago", in the reader's own language.
+ *
+ * Intl rather than a hand-written ladder, so the phrasing and the pluralisation
+ * come from the locale rather than from English assumptions.
+ */
+function relativeDay(timestamp: number, locale = 'en'): string {
+  const days = Math.round((timestamp - Date.now()) / (24 * 60 * 60 * 1000));
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  if (Math.abs(days) >= 7) return formatter.format(Math.round(days / 7), 'week');
+  return formatter.format(days, 'day');
+}
+
+/**
  * A preset's display name. The union member is an identifier, not copy, and
  * showing it raw puts a lowercase "balanced" in the interface.
  */
@@ -83,12 +112,22 @@ const PRESET_LABEL: Readonly<Record<PresetName, string>> = {
 export function App() {
   const nav = useNavigation('first-run');
   const isDesktop = useIsDesktop();
-  const [fit, setFit] = useState<FitMode>('fit');
-  const picker = useMediaPicker(fit);
-  const [preset, setPreset] = useState<PresetName>('balanced');
+  const store = useStore();
+  const { settings, update } = store;
+  const picker = useMediaPicker(settings.fit);
+
+  /**
+   * Whether to show the design's placeholder library.
+   *
+   * Only when a screen was requested by hand and nothing real is stored, so a
+   * reviewer can still see the populated design without a real user ever
+   * meeting fake entries.
+   */
+  const reviewing =
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('screen');
+  const showSamples = reviewing && store.items.length === 0;
   const [percent, setPercent] = useState(0);
   const [sheet, setSheet] = useState<SheetName | undefined>(undefined);
-  const [clipsEnabled, setClipsEnabled] = useState(true);
   const [offline, setOffline] = useState(false);
 
   const { screen, go, back, reset } = nav;
@@ -126,12 +165,70 @@ export function App() {
   const closeSheet = useCallback(() => setSheet(undefined), []);
   const openPlan = useCallback(() => setSheet('plan'), []);
 
+  /**
+   * Keeps what was prepared, so the library is real.
+   *
+   * The stored blob is the Status render, which is genuinely what this stage
+   * produces. It is not an encoded clip: that arrives with the pipeline in B1,
+   * and this is the honest artefact until then.
+   *
+   * The original is kept alongside it so the user can re-prepare at another
+   * quality without picking the file again, and pruned once the retention
+   * window passes.
+   */
+  const keepResult = useCallback(async () => {
+    const picked = picker.picked;
+    if (picked === undefined || !isAvailable()) return;
+    try {
+      const prepared = await (await fetch(picked.renderUrl)).blob();
+      await putItem({
+        id: `${Date.now()}-${picked.media.file.name}`,
+        name: picked.media.file.name,
+        createdAt: Date.now(),
+        width: STATUS_FRAME.width,
+        height: STATUS_FRAME.height,
+        durationSeconds: PREPARED.durationSeconds,
+        prepared,
+        original: picked.media.file,
+      });
+      await store.refresh();
+    } catch {
+      // A full disk or a private window. The user still has the result on
+      // screen and can save it, so this is not worth interrupting them for.
+    }
+  }, [picker.picked, store]);
+
   // A rejected file raises its sheet. These three were built with copy and were
   // unreachable until the picker was real.
   const { rejection, dismissRejection } = picker;
   useEffect(() => {
     if (rejection !== undefined) setSheet(REJECTION_SHEET[rejection]);
   }, [rejection]);
+
+  /**
+   * Stored records as the library grid wants them.
+   *
+   * Object URLs are minted per render and revoked on the next one, so a stored
+   * blob never leaks a URL that outlives the screen showing it.
+   */
+  const libraryItems: LibraryItem[] = useMemo(
+    () =>
+      store.items.map((item) => ({
+        id: item.id,
+        src: URL.createObjectURL(item.prepared),
+        name: item.name,
+        meta: `${formatDuration(item.durationSeconds)} · ${formatBytes(item.prepared.size)}`,
+        when: relativeDay(item.createdAt),
+      })),
+    [store.items],
+  );
+
+  useEffect(
+    () => () => {
+      for (const item of libraryItems) URL.revokeObjectURL(item.src);
+    },
+    [libraryItems],
+  );
 
   const chosen = picker.picked?.chosen;
   // The Status render, once there is one. Falls back to the design's mock for
@@ -151,8 +248,8 @@ export function App() {
           <EntryScreen
             file={chosen}
             thumbnailSrc={preview}
-            fit={fit}
-            onFitChange={setFit}
+            fit={settings.fit}
+            onFitChange={(fit) => update({ fit })}
             onBrowse={picker.browse}
             onBack={back}
             onContinue={() => go('preset')}
@@ -163,8 +260,8 @@ export function App() {
       case 'preset':
         return (
           <PresetScreen
-            selected={preset}
-            onSelect={setPreset}
+            selected={settings.preset}
+            onSelect={(preset) => update({ preset })}
             lockedPresets={['max']}
             onBack={back}
             onPrepare={() => go('processing')}
@@ -180,7 +277,7 @@ export function App() {
           <ResultScreen
             before={{ width: 720, height: 1280, bytes: 214 * 1024 }}
             after={PREPARED}
-            presetName={PRESET_LABEL[preset]}
+            presetName={PRESET_LABEL[settings.preset]}
             beforeImageSrc={beforeImage}
             afterImageSrc={preview}
             onBack={() => reset('library')}
@@ -195,9 +292,18 @@ export function App() {
             {...PREPARED}
             thumbnailSrc={afterImage}
             onBack={back}
-            onShareToStatus={() => reset('library')}
-            onSendAsDocument={() => reset('library')}
-            onSaveToDevice={() => reset('library')}
+            onShareToStatus={() => {
+              void keepResult();
+              reset('library');
+            }}
+            onSendAsDocument={() => {
+              void keepResult();
+              reset('library');
+            }}
+            onSaveToDevice={() => {
+              void keepResult();
+              reset('library');
+            }}
           />
         );
 
@@ -220,10 +326,10 @@ export function App() {
         if (isDesktop) {
           return (
             <DesktopLibraryScreen
-              items={SAMPLE_LIBRARY}
-              preparedBytes={268 * MB}
-              originalsBytes={144 * MB}
-              freeBytes={Math.round(1.2 * 1024 * MB)}
+              items={showSamples ? SAMPLE_LIBRARY : libraryItems}
+              preparedBytes={store.usage.preparedBytes}
+              originalsBytes={store.usage.originalsBytes}
+              freeBytes={store.usage.freeBytes}
               onReshare={() => setSheet('library-item')}
               onFreeUpSpace={() => setSheet('free-up-space')}
               onSettings={() => go('settings')}
@@ -233,10 +339,10 @@ export function App() {
         }
         return (
           <LibraryScreen
-            items={SAMPLE_LIBRARY}
-            preparedBytes={268 * MB}
-            originalsBytes={144 * MB}
-            freeBytes={Math.round(1.2 * 1024 * MB)}
+            items={showSamples ? SAMPLE_LIBRARY : libraryItems}
+            preparedBytes={store.usage.preparedBytes}
+            originalsBytes={store.usage.originalsBytes}
+            freeBytes={store.usage.freeBytes}
             onOpenItem={() => setSheet('library-item')}
             onFreeUpSpace={() => setSheet('free-up-space')}
             onSettings={() => go('settings')}
@@ -247,17 +353,18 @@ export function App() {
       case 'settings':
         return (
           <SettingsScreen
-            defaultPreset={PRESET_LABEL[preset]}
-            fit={fit}
-            clipsEnabled={clipsEnabled}
-            onClipsChange={setClipsEnabled}
-            keepOriginalsDays={7}
-            usedBytes={412 * MB}
+            defaultPreset={PRESET_LABEL[settings.preset]}
+            fit={settings.fit}
+            clipsEnabled={settings.clips}
+            onClipsChange={(clips) => update({ clips })}
+            keepOriginalsDays={settings.keepOriginalsDays}
+            usedBytes={store.usage.preparedBytes + store.usage.originalsBytes}
             language={en['language.english']}
             version="1.0.0"
             onBack={back}
             onEditPreset={() => go('preset')}
             onEditFit={() => go('entry')}
+            onRetentionChange={(keepOriginalsDays) => update({ keepOriginalsDays })}
             onEditRetention={() => setSheet('free-up-space')}
             onFreeUpSpace={() => setSheet('free-up-space')}
             onEditLanguage={() => undefined}
@@ -311,12 +418,17 @@ export function App() {
           dismissRejection();
           closeSheet();
         }}
-        fileBytes={chosen?.bytes ?? Math.round(1.4 * 1024 * MB)}
-        neededBytes={Math.round(2.8 * 1024 * MB)}
-        availableBytes={Math.round(1.2 * 1024 * MB)}
-        reclaimableBytes={144 * MB}
+        fileBytes={chosen?.bytes ?? 0}
+        // Preparing holds the original and the render at once, which is the
+        // same rule readPickedFile rejects on. Stating a different number in
+        // the sheet than the one that triggered it would be its own bug.
+        neededBytes={(chosen?.bytes ?? 0) * 2}
+        availableBytes={store.usage.freeBytes ?? 0}
+        reclaimableBytes={store.reclaimable}
         onUseDataSaver={() => {
-          setPreset('saver');
+          // Persisted, not just applied. Choosing the fallback after a failed
+          // encode is a preference, and it should still hold next time.
+          update({ preset: 'saver' });
           closeSheet();
         }}
         onRetry={() => {

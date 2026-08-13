@@ -5,7 +5,8 @@ export interface DesktopLibraryScreenProps {
   readonly items: readonly LibraryItem[];
   readonly preparedBytes: number;
   readonly originalsBytes: number;
-  readonly freeBytes: number;
+  /** Undefined where the browser will not report it. */
+  readonly freeBytes?: number | undefined;
   readonly onReshare: (id: string) => void;
   readonly onFreeUpSpace: () => void;
   readonly onSettings: () => void;
@@ -38,7 +39,7 @@ export function DesktopLibraryScreen({
   onPrepare,
 }: DesktopLibraryScreenProps) {
   const used = preparedBytes + originalsBytes;
-  const total = used + freeBytes;
+  const total = freeBytes === undefined ? Math.max(used, 1) : used + freeBytes;
 
   return (
     <div className="pr-desktop pr-desktop--app">
@@ -73,9 +74,11 @@ export function DesktopLibraryScreen({
               style={{ width: `${(originalsBytes / total) * 100}%` }}
             />
           </div>
-          <p className="pr-sidebar__free pr-numeric">
-            {format('desktop.library.free', { size: formatBytes(freeBytes) })}
-          </p>
+          {freeBytes !== undefined && (
+            <p className="pr-sidebar__free pr-numeric">
+              {format('desktop.library.free', { size: formatBytes(freeBytes) })}
+            </p>
+          )}
           <Button variant="outline" className="pr-button--block" onClick={onFreeUpSpace}>
             {en['action.freeUpSpace']}
           </Button>
