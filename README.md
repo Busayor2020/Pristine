@@ -4,7 +4,11 @@ Prepare photos and video for WhatsApp Status without losing the detail WhatsApp
 would otherwise re-encode away.
 
 This repo currently contains the scaffold, the design token system and the copy
-catalogue. No screens are built yet.
+catalogue, and every screen in the design except the two seller mode ones.
+
+What it does not contain is an encoder. The pipeline is gated on
+`experiments/results.md`, which does not exist yet, so the app runs against
+sample data with a faked encode. See [experiments/README.md](experiments/README.md).
 
 ## Setup
 
@@ -88,7 +92,7 @@ pnpm typecheck
 apps/web            React 18 + TypeScript + Vite, installable PWA
 packages/tokens     Design tokens. The single source of truth for colour and sizing
 packages/copy       Every user-facing string. No string literals in components
-packages/ui         Shared components. Empty until stage 5
+packages/ui         Shared components and the icon set
 packages/encoder    Media pipeline. Framework-free, no React
 experiments         CLI measurement harness. Node. Never shipped, never imported
 design              Claude Design exports. Reference material, not code

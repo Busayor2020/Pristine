@@ -47,7 +47,37 @@ export function buildReport(manifest: Manifest, results: readonly CandidateResul
     `Source: ${manifest.fixture.provenance}${manifest.fixture.make === undefined ? '' : ` (${manifest.fixture.make})`}`,
   );
   lines.push(`Generated: ${manifest.createdAt}`);
+  lines.push(`Scored at: ${new Date().toISOString()}`);
   lines.push(`Scored: ${scored.length} of ${manifest.candidates.length} arms`);
+  lines.push('');
+
+  lines.push('## Conditions');
+  lines.push('');
+  lines.push('WhatsApp changes its pipeline without announcement and behaves differently');
+  lines.push('by handset and by app version, so a score without these attached cannot be');
+  lines.push('compared to anything.');
+  lines.push('');
+  const { conditions } = manifest;
+  const rows: [string, string | undefined][] = [
+    ['Device', conditions.device],
+    ['OS', conditions.os],
+    ['WhatsApp', conditions.whatsapp],
+    ['ffmpeg', conditions.ffmpeg],
+    ['Note', conditions.note],
+  ];
+  lines.push('| | |');
+  lines.push('| --- | --- |');
+  for (const [label, value] of rows) {
+    lines.push(`| ${label} | ${value ?? '**not recorded**'} |`);
+  }
+  const unrecorded = rows.filter(([label, value]) => value === undefined && label !== 'Note');
+  if (unrecorded.length > 0) {
+    lines.push('');
+    lines.push(
+      `> ${unrecorded.length} condition(s) were not recorded. Fill in ` +
+        '`experiments/conditions.json` and re-run `compare` to attach them.',
+    );
+  }
   lines.push('');
 
   if (manifest.fixture.provenance === 'synthetic') {

@@ -49,9 +49,43 @@ export interface Candidate {
   readonly underStatusLimit: boolean;
 }
 
+/**
+ * The conditions a run happened under.
+ *
+ * None of this is recoverable after the fact, and a result with no device
+ * attached is not reproducible: WhatsApp's pipeline differs by app version and
+ * by handset, so a number without them cannot be compared to anything.
+ *
+ * Read from `experiments/conditions.json` when present. The ffmpeg build is
+ * captured automatically because it is the one part we can see.
+ */
+export interface Conditions {
+  /** Captured from `capabilities()`, never typed by hand. */
+  readonly ffmpeg: string;
+  readonly device?: string;
+  readonly os?: string;
+  readonly whatsapp?: string;
+  readonly note?: string;
+}
+
+export const CONDITIONS_NAME = 'conditions.json';
+
+/**
+ * Reads JSON written by a human on Windows.
+ *
+ * Notepad and PowerShell both write a UTF-8 BOM, and `JSON.parse` rejects it
+ * with a message that names an invisible character. conditions.json is
+ * hand-edited on exactly those machines, so stripping it is the difference
+ * between a working run and a baffling one.
+ */
+function parseJsonFile<T>(file: string): T {
+  return JSON.parse(fs.readFileSync(file, 'utf8').replace(/^﻿/, '')) as T;
+}
+
 export interface Manifest {
-  readonly version: 1;
+  readonly version: 2;
   readonly createdAt: string;
+  readonly conditions: Conditions;
   readonly fixture: {
     readonly name: string;
     readonly file: string;
@@ -92,9 +126,46 @@ export function readManifest(dir: string): Manifest {
   if (!fs.existsSync(file)) {
     throw new Error(`no ${MANIFEST_NAME} in ${dir}. Run generate first.`);
   }
-  const parsed = JSON.parse(fs.readFileSync(file, 'utf8')) as Manifest;
-  if (parsed.version !== 1) throw new Error(`unsupported manifest version ${parsed.version}`);
+  const parsed = parseJsonFile<Manifest>(file);
+  if (parsed.version !== 2) {
+    throw new Error(
+      `unsupported manifest version ${parsed.version}. Re-run generate to rebuild it.`,
+    );
+  }
   return parsed;
+}
+
+/**
+ * Reads the hand-written conditions file, if there is one.
+ *
+ * Called at `compare` time, not at `generate` time. The WhatsApp version and
+ * the handset are things the human knows once they have finished the posting
+ * pass, so filling in `conditions.json` afterwards and re-running `compare`
+ * has to attach them. The ffmpeg build is the exception: it is captured at
+ * generate, because that is when the candidates were actually encoded.
+ *
+ * Absent is allowed rather than fatal. The run is still worth scoring, and the
+ * report says plainly which fields are missing instead of refusing to produce
+ * anything.
+ */
+export function readConditions(dir: string, ffmpeg: string): Conditions {
+  const file = path.join(dir, CONDITIONS_NAME);
+  if (!fs.existsSync(file)) return { ffmpeg };
+  const parsed = parseJsonFile<Partial<Conditions>>(file);
+  return {
+    ffmpeg,
+    ...(parsed.device === undefined ? {} : { device: parsed.device }),
+    ...(parsed.os === undefined ? {} : { os: parsed.os }),
+    ...(parsed.whatsapp === undefined ? {} : { whatsapp: parsed.whatsapp }),
+    ...(parsed.note === undefined ? {} : { note: parsed.note }),
+  };
+}
+
+/** Arms with a returned file that has not been scored into a report yet. */
+export function unscoredArms(manifest: Manifest, returnedDir: string): string[] {
+  return manifest.candidates
+    .filter((candidate) => findReturnedFile(returnedDir, candidate.id) !== undefined)
+    .map((candidate) => candidate.id);
 }
 
 /**

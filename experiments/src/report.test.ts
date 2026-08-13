@@ -5,8 +5,14 @@ import type { Manifest } from './manifest.js';
 import type { CandidateResult } from './measure.js';
 
 const manifest: Manifest = {
-  version: 1,
+  version: 2,
   createdAt: '2026-08-10T00:00:00.000Z',
+  conditions: {
+    ffmpeg: '6.1.1-essentials_build-www.gyan.dev',
+    device: 'TECNO Spark 10 Pro',
+    os: 'Android 13',
+    whatsapp: '2.24.1.1',
+  },
   fixture: {
     name: 'sample',
     file: 'fixtures/sample.png',

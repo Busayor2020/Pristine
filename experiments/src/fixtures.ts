@@ -37,30 +37,39 @@ export interface SyntheticFixture {
 }
 
 /**
- * Each chart isolates one thing compression is known to damage. Kept few and
- * legible rather than exhaustive: a chart nobody can interpret produces a
- * number nobody can act on.
+ * Four charts, each leaning towards one kind of damage.
+ *
+ * The `stresses` strings say "leans towards" rather than "isolates" on purpose.
+ * `detail` and `chroma` are ffmpeg's generic `testsrc2` and `testsrc` patterns,
+ * which each contain edges, colour bars and gradients together. They overlap,
+ * and neither is a purpose built chart for the thing its name suggests.
+ *
+ * Overstating them would be worse than the imprecision: someone would read a
+ * result as isolating chroma subsampling when the chart also moved half a dozen
+ * other variables. Purpose built charts are worth building if a real run ever
+ * turns on one of these, and until then honest labels cost nothing.
  */
 export const SYNTHETIC_FIXTURES: readonly SyntheticFixture[] = [
   {
     name: 'detail',
-    stresses: 'High frequency detail. The first thing a low bitrate throws away.',
-    // Dense concentric rings sweep spatial frequency across the whole frame.
+    stresses:
+      'Leans towards high frequency detail. A generic ffmpeg pattern, so it also carries edges and colour.',
     graph: `testsrc2=size=${FIXTURE_SIZE.width}x${FIXTURE_SIZE.height}:rate=1:duration=1`,
   },
   {
     name: 'gradient',
-    stresses: 'Smooth gradients. Exposes banding from 8 bit quantisation.',
+    stresses: 'Smooth two colour ramp. The one chart here that does isolate its target, banding.',
     graph: `gradients=size=${FIXTURE_SIZE.width}x${FIXTURE_SIZE.height}:rate=1:duration=1:c0=0x101820:c1=0xE8B33D:nb_colors=2`,
   },
   {
     name: 'noise',
-    stresses: 'Sensor grain. Noise is expensive to encode and gets smeared.',
+    stresses: 'Uniform noise over flat grey. Isolates how noise is smeared, but it is not sensor grain.',
     graph: `color=c=0x3A3A3A:size=${FIXTURE_SIZE.width}x${FIXTURE_SIZE.height}:rate=1:duration=1,noise=alls=42:allf=t+u`,
   },
   {
     name: 'chroma',
-    stresses: 'Saturated colour edges. 4:2:0 subsampling halves chroma resolution.',
+    stresses:
+      'Leans towards saturated colour edges. Also a generic ffmpeg pattern, not a purpose built chroma chart.',
     graph: `testsrc=size=${FIXTURE_SIZE.width}x${FIXTURE_SIZE.height}:rate=1:duration=1`,
   },
 ];

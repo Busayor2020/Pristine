@@ -2,7 +2,15 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { findReturnedFile, readManifest, writeManifest, type Manifest } from './manifest.js';
+import {
+  CONDITIONS_NAME,
+  findReturnedFile,
+  readConditions,
+  readManifest,
+  unscoredArms,
+  writeManifest,
+  type Manifest,
+} from './manifest.js';
 
 let dir: string;
 
@@ -15,8 +23,9 @@ afterEach(() => {
 });
 
 const manifest: Manifest = {
-  version: 1,
+  version: 2,
   createdAt: '2026-08-10T00:00:00.000Z',
+  conditions: { ffmpeg: '6.1.1-essentials_build-www.gyan.dev' },
   fixture: {
     name: 'x',
     file: 'fixtures/x.png',
@@ -49,9 +58,67 @@ describe('manifest io', () => {
     expect(() => readManifest(dir)).toThrow(/Run generate first/);
   });
 
-  it('refuses a manifest from a future version', () => {
-    writeManifest(dir, { ...manifest, version: 2 as unknown as 1 });
+  it('refuses a manifest from a version it does not understand', () => {
+    writeManifest(dir, { ...manifest, version: 99 as unknown as 2 });
     expect(() => readManifest(dir)).toThrow(/unsupported manifest version/);
+  });
+
+  /**
+   * A v1 manifest predates the conditions field, so a run generated before this
+   * change has no device attached. Re-generating is cheap; pretending the
+   * conditions are known is not.
+   */
+  it('tells you to regenerate rather than reading a v1 manifest', () => {
+    writeManifest(dir, { ...manifest, version: 1 as unknown as 2 });
+    expect(() => readManifest(dir)).toThrow(/Re-run generate/);
+  });
+});
+
+describe('readConditions', () => {
+  it('captures the ffmpeg build even with no conditions file', () => {
+    expect(readConditions(dir, '6.1.1')).toEqual({ ffmpeg: '6.1.1' });
+  });
+
+  /**
+   * conditions.json is hand-edited, usually on Windows, where Notepad and
+   * PowerShell both write a UTF-8 BOM that JSON.parse rejects.
+   */
+  it('reads a file saved with a byte order mark', () => {
+    fs.writeFileSync(
+      path.join(dir, CONDITIONS_NAME),
+      `﻿${JSON.stringify({ device: 'TECNO Spark 10 Pro' })}`,
+      'utf8',
+    );
+    expect(readConditions(dir, '6.1.1').device).toBe('TECNO Spark 10 Pro');
+  });
+
+  it('reads the recorded conditions and always keeps the real ffmpeg build', () => {
+    fs.writeFileSync(
+      path.join(dir, CONDITIONS_NAME),
+      JSON.stringify({ device: 'Infinix Hot 30', os: 'Android 13', ffmpeg: 'a lie' }),
+    );
+    expect(readConditions(dir, '6.1.1')).toEqual({
+      ffmpeg: '6.1.1',
+      device: 'Infinix Hot 30',
+      os: 'Android 13',
+    });
+  });
+});
+
+describe('unscoredArms', () => {
+  it('finds nothing when nothing has come back', () => {
+    expect(unscoredArms(manifest, path.join(dir, 'returned'))).toEqual([]);
+  });
+
+  /**
+   * The guard that stops generate throwing away a posting session, which is the
+   * expensive part of this experiment.
+   */
+  it('finds arms that have come back', () => {
+    const returned = path.join(dir, 'returned');
+    fs.mkdirSync(returned);
+    fs.writeFileSync(path.join(returned, '01-WA0007.jpg'), 'x');
+    expect(unscoredArms(manifest, returned)).toEqual(['01']);
   });
 });
 

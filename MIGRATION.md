@@ -318,7 +318,7 @@ The voice is untouched otherwise. The copy is good and it was left alone.
 
 ### 7.3 Structural changes
 
-- Strings are flat and dot-keyed in `packages/ui/src/copy/en.ts`, ready for a
+- Strings are flat and dot-keyed in `packages/copy/src/en.ts`, ready for a
   locale file to be copied and translated.
 - Values that vary (sizes, durations, counts, dimensions) are `{name}`
   placeholders rather than baked into the sentence, because word order around

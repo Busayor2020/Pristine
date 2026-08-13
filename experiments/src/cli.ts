@@ -29,9 +29,17 @@ import {
   undecodableReason,
 } from './fixtures.js';
 import { generate } from './generate.js';
-import { findReturnedFile, readManifest, writeManifest } from './manifest.js';
+import {
+  findReturnedFile,
+  readConditions,
+  readManifest,
+  unscoredArms,
+  writeManifest,
+  type Manifest,
+} from './manifest.js';
 import { measureReturned, type CandidateResult } from './measure.js';
 import { buildReport } from './report.js';
+import { RESULTS_DIR, RESULTS_INDEX, archiveRun, buildIndex, readRuns, reportName } from './runs.js';
 
 const ROOT = path.resolve(fileURLToPath(import.meta.url), '../..');
 const DIRS = {
@@ -39,8 +47,14 @@ const DIRS = {
   candidates: path.join(ROOT, 'candidates'),
   returned: path.join(ROOT, 'returned'),
   work: path.join(ROOT, 'candidates', '.work'),
-  results: path.join(ROOT, 'results.md'),
+  resultsDir: path.join(ROOT, RESULTS_DIR),
+  index: path.join(ROOT, RESULTS_INDEX),
 };
+
+/** Rewrites results.md from whatever reports are on disk. */
+function refreshIndex(): void {
+  fs.writeFileSync(DIRS.index, buildIndex(readRuns(ROOT)), 'utf8');
+}
 
 type Command = (args: readonly string[]) => Promise<void>;
 
@@ -103,13 +117,40 @@ const commands: Record<string, Command> = {
       return;
     }
 
-    const fit = (args[1] ?? 'fit') as FitMode;
+    const force = args.includes('--force');
+    const positional = args.filter((arg) => !arg.startsWith('--'));
+    const fit = (positional[1] ?? 'fit') as FitMode;
     if (fit !== 'fit' && fit !== 'crop') throw new TypeError('fit must be "fit" or "crop"');
+
+    // Refuse to throw away a posting session. Getting nine files through Status
+    // by hand is the expensive part of this experiment, and silently
+    // overwriting candidates/ while returned/ still holds unscored files
+    // destroys exactly that.
+    if (!force && fs.existsSync(path.join(DIRS.candidates, 'manifest.json'))) {
+      const previous = readManifest(DIRS.candidates);
+      const pending = unscoredArms(previous, DIRS.returned);
+      if (pending.length > 0) {
+        console.error(
+          `\nThere is an unscored run in progress for "${previous.fixture.name}".\n` +
+            `${pending.length} arm(s) have come back and have not been scored: ${pending.join(', ')}.\n\n` +
+            `Score it first:      pnpm exp compare\n` +
+            `Then put it away:    pnpm exp archive\n` +
+            `Or discard it:       pnpm exp generate ${positional[0] ?? '<fixture>'} --force\n`,
+        );
+        process.exitCode = 1;
+        return;
+      }
+    }
 
     const fixture = path.isAbsolute(name) ? name : path.join(DIRS.fixtures, name);
     const resolved = fs.existsSync(fixture) ? fixture : `${fixture}.png`;
 
-    const manifest = await generate({ fixture: resolved, outDir: DIRS.candidates, fit });
+    const manifest = await generate({
+      fixture: resolved,
+      outDir: DIRS.candidates,
+      fit,
+      experimentsRoot: ROOT,
+    });
     writeManifest(DIRS.candidates, manifest);
 
     console.log(`\nBuilt ${manifest.candidates.length} candidates in candidates/\n`);
@@ -166,8 +207,42 @@ const commands: Record<string, Command> = {
       );
     }
 
-    fs.writeFileSync(DIRS.results, buildReport(manifest, results), 'utf8');
-    console.log(`\nWrote ${path.relative(ROOT, DIRS.results)}`);
+    // Conditions are re-read here rather than trusted from the manifest, so
+    // filling in conditions.json after the posting pass and re-running compare
+    // attaches them. The ffmpeg build stays as recorded at generate time.
+    const scored: Manifest = {
+      ...manifest,
+      conditions: readConditions(ROOT, manifest.conditions.ffmpeg),
+    };
+
+    fs.mkdirSync(DIRS.resultsDir, { recursive: true });
+    const report = path.join(DIRS.resultsDir, reportName(scored));
+    fs.writeFileSync(report, buildReport(scored, results), 'utf8');
+    refreshIndex();
+
+    console.log(`\nWrote ${path.relative(ROOT, report)}`);
+    console.log(`Updated ${RESULTS_INDEX}`);
+  },
+
+  /**
+   * Puts a finished run away so the next fixture starts clean.
+   *
+   * Moves rather than copies the media, which can be large and has no reason to
+   * exist twice. The report is copied, so it stays in the index.
+   */
+  async archive() {
+    const manifest = readManifest(DIRS.candidates);
+    const target = archiveRun(ROOT, manifest);
+    refreshIndex();
+    console.log(`Archived "${manifest.fixture.name}" to ${path.relative(ROOT, target)}`);
+    console.log('candidates/ and returned/ are now clear for the next fixture.');
+  },
+
+  /** Rebuilds results.md from the reports on disk. */
+  async reindex() {
+    refreshIndex();
+    const runs = readRuns(ROOT);
+    console.log(`Indexed ${runs.length} run(s) into ${RESULTS_INDEX}`);
   },
 };
 

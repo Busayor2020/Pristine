@@ -9,3 +9,10 @@ returned/
 # committed deliberately, so they are allowlisted below.
 fixtures/*.png
 !fixtures/.gitkeep
+
+# Archived runs carry their media, which is large and device specific. The
+# reports under results/ are the part worth versioning.
+runs/
+
+# Local to one device and one sitting. conditions.example.json is the template.
+conditions.json

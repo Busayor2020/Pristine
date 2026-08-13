@@ -1,0 +1,7 @@
+{
+  "_comment": "Copy to conditions.json and fill in before running compare. None of this is recoverable afterwards, and a score with no device attached cannot be compared to anything. The ffmpeg build is captured automatically.",
+  "device": "TECNO Spark 10 Pro",
+  "os": "Android 13",
+  "whatsapp": "2.24.x.x",
+  "note": "One account, one sitting, home wifi."
+}

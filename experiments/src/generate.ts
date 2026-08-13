@@ -10,9 +10,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { STATUS_FRAME, STATUS_MAX_BYTES, isUnderStatusLimit } from '@pristine/encoder';
 import type { FitMode } from '@pristine/encoder';
-import { probe, run } from './ffmpeg.js';
+import { capabilities, probe, run } from './ffmpeg.js';
 import { HELD_CONSTANT, MATRIX } from './matrix.js';
 import type { Candidate, Manifest } from './manifest.js';
+import { readConditions } from './manifest.js';
 import { readProvenance } from './fixtures.js';
 
 const { width: W, height: H } = STATUS_FRAME;
@@ -113,10 +114,12 @@ export interface GenerateOptions {
   readonly fixture: string;
   readonly outDir: string;
   readonly fit: FitMode;
+  /** Where conditions.json lives, so the run records what produced it. */
+  readonly experimentsRoot: string;
 }
 
 export async function generate(options: GenerateOptions): Promise<Manifest> {
-  const { fixture, outDir, fit } = options;
+  const { fixture, outDir, fit, experimentsRoot } = options;
   if (!fs.existsSync(fixture)) throw new Error(`fixture not found: ${fixture}`);
 
   const fixtureInfo = await probe(fixture);
@@ -186,9 +189,12 @@ export async function generate(options: GenerateOptions): Promise<Manifest> {
     );
   }
 
+  const caps = await capabilities();
+
   return {
-    version: 1,
+    version: 2,
     createdAt: new Date().toISOString(),
+    conditions: readConditions(experimentsRoot, caps.version),
     fixture: {
       name: path.basename(fixture, path.extname(fixture)),
       file: path.relative(process.cwd(), fixture).split(path.sep).join('/'),
