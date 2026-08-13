@@ -5,11 +5,13 @@ import { en } from '@pristine/copy';
 import { OfflineBanner, OfflineIcon, type LibraryItem } from '@pristine/ui';
 import { useNavigation } from './navigation.js';
 import { useIsDesktop } from './useMediaQuery.js';
+import { useMediaPicker } from './useMediaPicker.js';
+import type { MediaRejection } from './media.js';
 import { SheetHost, type SheetName } from './sheets.js';
 import { DesktopFirstRunScreen } from './screens/DesktopFirstRunScreen.js';
 import { DesktopLibraryScreen } from './screens/DesktopLibraryScreen.js';
 import { EducationScreen } from './screens/EducationScreen.js';
-import { EntryScreen, type ChosenFile } from './screens/EntryScreen.js';
+import { EntryScreen } from './screens/EntryScreen.js';
 import { ExportScreen } from './screens/ExportScreen.js';
 import { FirstRunScreen } from './screens/FirstRunScreen.js';
 import { LibraryScreen } from './screens/LibraryScreen.js';
@@ -38,11 +40,11 @@ import afterImage from './assets/sample-fabric-prepared.jpg';
 
 const MB = 1024 * 1024;
 
-const SAMPLE_FILE: ChosenFile = {
-  name: 'IMG_20260809_1432.jpg',
-  width: 4032,
-  height: 3024,
-  size: '3.8 MB',
+/** Maps a rejected file to the sheet that explains it and offers a way on. */
+const REJECTION_SHEET: Readonly<Record<MediaRejection, SheetName>> = {
+  'too-large': 'file-too-large',
+  'unsupported-format': 'unsupported-format',
+  'low-storage': 'low-storage',
 };
 
 const PREPARED = {
@@ -81,8 +83,8 @@ const PRESET_LABEL: Readonly<Record<PresetName, string>> = {
 export function App() {
   const nav = useNavigation('first-run');
   const isDesktop = useIsDesktop();
-  const [file, setFile] = useState<ChosenFile | undefined>(undefined);
   const [fit, setFit] = useState<FitMode>('fit');
+  const picker = useMediaPicker(fit);
   const [preset, setPreset] = useState<PresetName>('balanced');
   const [percent, setPercent] = useState(0);
   const [sheet, setSheet] = useState<SheetName | undefined>(undefined);
@@ -121,9 +123,20 @@ export function App() {
     return () => window.clearInterval(timer);
   }, [screen, go]);
 
-  const chooseFile = useCallback(() => setFile(SAMPLE_FILE), []);
   const closeSheet = useCallback(() => setSheet(undefined), []);
   const openPlan = useCallback(() => setSheet('plan'), []);
+
+  // A rejected file raises its sheet. These three were built with copy and were
+  // unreachable until the picker was real.
+  const { rejection, dismissRejection } = picker;
+  useEffect(() => {
+    if (rejection !== undefined) setSheet(REJECTION_SHEET[rejection]);
+  }, [rejection]);
+
+  const chosen = picker.picked?.chosen;
+  // The Status render, once there is one. Falls back to the design's mock for
+  // the first run hero, which has no file yet.
+  const preview = picker.picked?.renderUrl ?? afterImage;
 
   const screenElement = (() => {
     switch (screen) {
@@ -136,11 +149,11 @@ export function App() {
       case 'entry':
         return (
           <EntryScreen
-            file={file}
-            thumbnailSrc={afterImage}
+            file={chosen}
+            thumbnailSrc={preview}
             fit={fit}
             onFitChange={setFit}
-            onBrowse={chooseFile}
+            onBrowse={picker.browse}
             onBack={back}
             onContinue={() => go('preset')}
             onInstall={() => setSheet('android-only')}
@@ -169,7 +182,7 @@ export function App() {
             after={PREPARED}
             presetName={PRESET_LABEL[preset]}
             beforeImageSrc={beforeImage}
-            afterImageSrc={afterImage}
+            afterImageSrc={preview}
             onBack={() => reset('library')}
             onExport={() => go('export')}
             onWhy={() => go('education')}
@@ -291,10 +304,14 @@ export function App() {
         </div>
       )}
       {screenElement}
+      <input {...picker.inputProps} />
       <SheetHost
         sheet={sheet}
-        onClose={closeSheet}
-        fileBytes={Math.round(1.4 * 1024 * MB)}
+        onClose={() => {
+          dismissRejection();
+          closeSheet();
+        }}
+        fileBytes={chosen?.bytes ?? Math.round(1.4 * 1024 * MB)}
         neededBytes={Math.round(2.8 * 1024 * MB)}
         availableBytes={Math.round(1.2 * 1024 * MB)}
         reclaimableBytes={144 * MB}
@@ -307,9 +324,11 @@ export function App() {
           go('processing');
         }}
         onChooseAnother={() => {
-          setFile(undefined);
+          picker.clear();
+          dismissRejection();
           closeSheet();
           reset('entry');
+          picker.browse();
         }}
         onInstall={closeSheet}
       />

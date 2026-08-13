@@ -31,3 +31,6 @@ export {
 } from './status.js';
 
 export { ASSUMED_UPLOAD_BPS, estimateUploadSeconds } from './estimate.js';
+
+export { cropWouldLoseContent, isLyingDown, renderToStatusFrame } from './render.js';
+export type { DrawableSource, Renderable, RenderOptions } from './render.js';

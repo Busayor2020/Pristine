@@ -9,13 +9,22 @@ import {
   MediaSummary,
   OrientationIcon,
   PhotoIcon,
+  formatBytes,
 } from '@pristine/ui';
 
 export interface ChosenFile {
   readonly name: string;
   readonly width: number;
   readonly height: number;
-  readonly size: string;
+  /**
+   * Bytes, not a preformatted string.
+   *
+   * The type carries data and the edge formats it, so the same value can drive
+   * the storage checks and the estimate without being parsed back out of "3.8
+   * MB".
+   */
+  readonly bytes: number;
+  readonly lyingDown: boolean;
 }
 
 export interface EntryScreenProps {
@@ -49,8 +58,9 @@ export function EntryScreen({
   onContinue,
   onInstall,
 }: EntryScreenProps) {
-  // Anything wider than it is tall has to be told how to fill a 9:16 frame.
-  const isLandscape = file !== undefined && file.width > file.height;
+  // Decided when the file is read, not here: it is a property of the media, and
+  // the encoder owns what "lying down" means.
+  const isLandscape = file?.lyingDown === true;
 
   return (
     <div className="pr-screen">
@@ -76,7 +86,7 @@ export function EntryScreen({
             meta={format('format.mediaMeta', {
               width: file.width,
               height: file.height,
-              size: file.size,
+              size: formatBytes(file.bytes),
             })}
             action={
               <Button variant="inline" onClick={onBrowse}>
