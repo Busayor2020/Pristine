@@ -136,10 +136,12 @@ export function App() {
    * Only when a screen was requested by hand and nothing real is stored, so a
    * reviewer can still see the populated design without a real user ever
    * meeting fake entries.
+   *
+   * Read from the navigation hook, which captured it at load. Every URL
+   * carries a screen once the user starts moving, so asking the address bar
+   * later would say yes to everyone.
    */
-  const reviewing =
-    typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('screen');
-  const showSamples = reviewing && store.items.length === 0;
+  const showSamples = nav.deepLinked && store.items.length === 0;
   const [percent, setPercent] = useState(0);
   const [sheet, setSheet] = useState<SheetName | undefined>(undefined);
   const [offline, setOffline] = useState(false);
