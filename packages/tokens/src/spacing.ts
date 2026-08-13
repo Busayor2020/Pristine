@@ -76,6 +76,20 @@ export const layout = {
    */
   desktopBreakpoint: 960,
 
+  /**
+   * The width the phone shell stops growing at, in px.
+   *
+   * Not the same thing as the 390x844 artboard, which MIGRATION.md section 5
+   * deliberately did not tokenise because it is a mockup frame rather than a
+   * layout rule. This is a layout rule: only first run and library have desktop
+   * variants, so the other eight screens keep the phone layout at every width
+   * and would otherwise run edge to edge on a laptop.
+   *
+   * Set slightly above the artboard so the design's line lengths hold with a
+   * little air, rather than pinning the column to the mockup's exact width.
+   */
+  phoneShellMaxWidth: 440,
+
   /** Sidebar on the desktop library. */
   sidebarWidth: 240,
 

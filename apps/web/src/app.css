@@ -53,6 +53,19 @@ body {
   background: var(--pr-color-surface-0);
 }
 
+/*
+ * Only first run and library get desktop variants, so the other eight screens
+ * keep this layout at every width. Left alone they run edge to edge on a
+ * laptop, which turns the education card into a single line of text 1300px
+ * wide. Centre the column instead once there is room to.
+ */
+@media (min-width: 960px) {
+  .pr-screen {
+    max-width: var(--pr-layout-phone-shell-max-width);
+    margin-inline: auto;
+  }
+}
+
 .pr-screen__scroll {
   flex: 1;
   min-height: 0;
