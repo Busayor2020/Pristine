@@ -298,6 +298,19 @@ export const en = {
   'sheet.plan.item2': 'Splits past 2 parts',
   'sheet.plan.item3': 'Batches and brand kit',
 
+  // Document and install metadata.
+  //
+  // Read at build time by apps/web/vite.config.ts for the head tags and the PWA
+  // manifest. User-facing in both places: the description shows in the install
+  // prompt and in a link preview, so it belongs here rather than in a config.
+  //
+  // Nothing here may assert a quality gain. The framing matches firstRun.title,
+  // which says what the product is for without claiming a measured result.
+  'meta.title': 'Pristine',
+  'meta.description':
+    'Prepare your photos and video for WhatsApp Status before you post. No account, and nothing leaves your device.',
+  'meta.ogTitle': 'Pristine. Post to Status without losing the shot.',
+
   // Desktop.
   //
   // The brief allows desktop variants for first run and library only, and the
