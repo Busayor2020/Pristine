@@ -13,6 +13,7 @@ export {
   format,
   interpolate,
   placeholdersIn,
+  plural,
   placeholdersInTemplate,
   templateParts,
   templatePartsOf,

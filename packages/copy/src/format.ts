@@ -40,6 +40,23 @@ export function placeholdersIn(key: CopyKey): string[] {
   return placeholdersInTemplate(en[key]);
 }
 
+/**
+ * Picks the right plural form for a count.
+ *
+ * Intl.PluralRules rather than `count === 1`, because that test is an English
+ * assumption. Several of the languages this product already lists in settings
+ * do not split one from many the way English does, and a hardcoded ternary
+ * would have to be unpicked for every one of them.
+ *
+ * Looks for `<key>.one`, `<key>.other` and so on, falling back to `other`,
+ * which every locale defines.
+ */
+export function plural(base: string, count: number, locale = 'en'): CopyKey {
+  const category = new Intl.PluralRules(locale).select(count);
+  const candidate = `${base}.${category}` as CopyKey;
+  return candidate in en ? candidate : (`${base}.other` as CopyKey);
+}
+
 export type TemplatePart =
   | { readonly kind: 'text'; readonly text: string }
   | { readonly kind: 'placeholder'; readonly name: string };

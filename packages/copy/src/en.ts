@@ -171,7 +171,11 @@ export const en = {
   'library.prepared': 'Prepared',
   'library.originals': 'Originals',
   'library.sectionPrepared': 'PREPARED',
-  'library.count': '{count} items',
+  // Plural forms, selected by Intl.PluralRules rather than by an English
+  // ternary. A locale that needs "few" or "many" adds a key here and nothing
+  // at the call site changes.
+  'library.count.one': '{count} item',
+  'library.count.other': '{count} items',
   'library.cta': 'Prepare something',
   'libraryEmpty.title': 'Nothing prepared yet',
   'libraryEmpty.body':
@@ -328,7 +332,8 @@ export const en = {
   'desktop.firstRun.cta': 'Choose a photo',
   'desktop.firstRun.reassurance': 'No account, no email. Your media never leaves this device.',
 
-  'desktop.library.meta': '{count} items · {size} prepared',
+  'desktop.library.meta.one': '{count} item · {size} prepared',
+  'desktop.library.meta.other': '{count} items · {size} prepared',
   'desktop.library.reshare': 'Re-share',
   'desktop.library.using': 'Using {size}',
   'desktop.library.free': '{size} free on this device',

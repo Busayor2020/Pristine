@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { en, type CopyKey } from './en.js';
-import { format, interpolate, placeholdersIn } from './format.js';
+import { format, interpolate, placeholdersIn, plural } from './format.js';
 import { unverifiedCopy } from './unverified.js';
 
 const entries = Object.entries(en) as [CopyKey, string][];
@@ -139,6 +139,45 @@ describe('format', () => {
     for (const key of Object.keys(en) as CopyKey[]) {
       const values = Object.fromEntries(placeholdersIn(key).map((name) => [name, 'x']));
       expect(format(key, values), `${key} left a placeholder`).not.toMatch(/\{\w+\}/);
+    }
+  });
+});
+
+describe('plural', () => {
+  it('picks the singular for one', () => {
+    expect(format(plural('library.count', 1), { count: 1 })).toBe('1 item');
+  });
+
+  it('picks the plural for none and for many', () => {
+    expect(format(plural('library.count', 0), { count: 0 })).toBe('0 items');
+    expect(format(plural('library.count', 12), { count: 12 })).toBe('12 items');
+  });
+
+  it('follows the locale rather than an English rule', () => {
+    // Welsh has six categories. English "one or not one" would answer wrongly
+    // here, which is the whole reason this goes through Intl.
+    expect(plural('library.count', 2, 'cy')).toBe('library.count.other');
+    expect(plural('library.count', 1, 'cy')).toBe('library.count.one');
+  });
+
+  it('falls back to other when a locale asks for a category we do not carry', () => {
+    // Russian wants "few" for 3. The catalogue is English and has no such
+    // entry, so the caller gets a real string instead of undefined.
+    expect(plural('library.count', 3, 'ru')).toBe('library.count.other');
+  });
+
+  it('carries every category a pluralised key starts', () => {
+    const bases = new Set(
+      Object.keys(en)
+        .filter((key) => key.endsWith('.one'))
+        .map((key) => key.slice(0, -'.one'.length)),
+    );
+    for (const base of bases) {
+      expect(en, `${base} has .one without .other`).toHaveProperty(`${base}.other`);
+      expect(
+        placeholdersIn(`${base}.one` as CopyKey).sort(),
+        `${base} forms expect different values`,
+      ).toEqual(placeholdersIn(`${base}.other` as CopyKey).sort());
     }
   });
 });

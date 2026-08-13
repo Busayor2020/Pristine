@@ -1,4 +1,4 @@
-import { en, format } from '@pristine/copy';
+import { en, format, plural } from '@pristine/copy';
 import { Button, PlusIcon, Wordmark, formatBytes, type LibraryItem } from '@pristine/ui';
 
 export interface DesktopLibraryScreenProps {
@@ -89,7 +89,7 @@ export function DesktopLibraryScreen({
         <header className="pr-desktop__header">
           <h1 className="pr-desktop__title">{en['desktop.nav.library']}</h1>
           <p className="pr-desktop__meta pr-numeric">
-            {format('desktop.library.meta', {
+            {format(plural('desktop.library.meta', items.length), {
               count: items.length,
               size: formatBytes(preparedBytes),
             })}

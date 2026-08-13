@@ -1,4 +1,4 @@
-import { en, format } from '@pristine/copy';
+import { en, format, plural } from '@pristine/copy';
 import {
   Button,
   LibraryGrid,
@@ -107,7 +107,7 @@ export function LibraryScreen({
             {en['library.sectionPrepared']}
           </h2>
           <span className="pr-library__count pr-numeric">
-            {format('library.count', { count: items.length })}
+            {format(plural('library.count', items.length), { count: items.length })}
           </span>
         </div>
 
