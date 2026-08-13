@@ -24,7 +24,13 @@ describe('coerce', () => {
   });
 
   it('keeps values it recognises', () => {
-    const stored = { preset: 'saver', fit: 'crop', clips: false, keepOriginalsDays: 30, language: 'ha' };
+    const stored = {
+      preset: 'saver',
+      fit: 'crop',
+      clips: false,
+      keepOriginalsDays: 30,
+      language: 'ha',
+    };
     expect(coerce(stored)).toEqual(stored);
   });
 

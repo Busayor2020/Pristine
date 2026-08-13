@@ -83,6 +83,20 @@ const SAMPLE_LIBRARY: readonly LibraryItem[] = [
   meta: index % 2 === 0 ? '0:06 · 2.1 MB' : '0:06 · 1.9 MB',
 }));
 
+/**
+ * The design's storage figures, shown only alongside the sample library.
+ *
+ * A review view has to be consistently the design or consistently real. Six
+ * sample items beside a true "0 KB" is neither, and reads as a bug in the
+ * storage meter rather than as a placeholder.
+ */
+const SAMPLE_USAGE = {
+  preparedBytes: 268 * MB,
+  originalsBytes: 144 * MB,
+  freeBytes: Math.round(1.2 * 1024 * MB),
+  reclaimable: 144 * MB,
+};
+
 /** How long the faked encode takes, in ms. Replaced by the real pipeline. */
 const FAKE_ENCODE_MS = 2600;
 
@@ -230,6 +244,18 @@ export function App() {
     [libraryItems],
   );
 
+  // Everything the library and storage screens read, either all real or all
+  // from the design.
+  const shown = showSamples
+    ? { items: SAMPLE_LIBRARY, ...SAMPLE_USAGE }
+    : {
+        items: libraryItems,
+        preparedBytes: store.usage.preparedBytes,
+        originalsBytes: store.usage.originalsBytes,
+        freeBytes: store.usage.freeBytes,
+        reclaimable: store.reclaimable,
+      };
+
   const chosen = picker.picked?.chosen;
   // The Status render, once there is one. Falls back to the design's mock for
   // the first run hero, which has no file yet.
@@ -326,10 +352,10 @@ export function App() {
         if (isDesktop) {
           return (
             <DesktopLibraryScreen
-              items={showSamples ? SAMPLE_LIBRARY : libraryItems}
-              preparedBytes={store.usage.preparedBytes}
-              originalsBytes={store.usage.originalsBytes}
-              freeBytes={store.usage.freeBytes}
+              items={shown.items}
+              preparedBytes={shown.preparedBytes}
+              originalsBytes={shown.originalsBytes}
+              freeBytes={shown.freeBytes}
               onReshare={() => setSheet('library-item')}
               onFreeUpSpace={() => setSheet('free-up-space')}
               onSettings={() => go('settings')}
@@ -339,10 +365,10 @@ export function App() {
         }
         return (
           <LibraryScreen
-            items={showSamples ? SAMPLE_LIBRARY : libraryItems}
-            preparedBytes={store.usage.preparedBytes}
-            originalsBytes={store.usage.originalsBytes}
-            freeBytes={store.usage.freeBytes}
+            items={shown.items}
+            preparedBytes={shown.preparedBytes}
+            originalsBytes={shown.originalsBytes}
+            freeBytes={shown.freeBytes}
             onOpenItem={() => setSheet('library-item')}
             onFreeUpSpace={() => setSheet('free-up-space')}
             onSettings={() => go('settings')}
@@ -424,7 +450,7 @@ export function App() {
         // the sheet than the one that triggered it would be its own bug.
         neededBytes={(chosen?.bytes ?? 0) * 2}
         availableBytes={store.usage.freeBytes ?? 0}
-        reclaimableBytes={store.reclaimable}
+        reclaimableBytes={shown.reclaimable}
         onUseDataSaver={() => {
           // Persisted, not just applied. Choosing the fallback after a failed
           // encode is a preference, and it should still hold next time.
