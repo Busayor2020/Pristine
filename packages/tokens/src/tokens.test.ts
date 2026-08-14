@@ -56,22 +56,31 @@ describe('colour', () => {
    * AA on the surfaces it is actually allowed to sit on.
    */
   it('clears WCAG AA for body text on every surface it is used on', () => {
-    const surfaces = [surface[0], surface[1], surface[2], surface[3], surface[4]];
+    const surfaces = [surface[0], surface[1], surface[2], surface[3], surface[4], surface[5]];
     for (const bg of surfaces) {
       for (const fg of [text.primary, text.secondary, text.tertiary, text.muted]) {
-        expect(contrast(fg, bg)).toBeGreaterThanOrEqual(4.5);
+        expect(contrast(fg, bg), `${fg} on ${bg}`).toBeGreaterThanOrEqual(4.5);
       }
     }
   });
 
   /**
-   * text.muted on surface-5 lands at 4.13, below AA. Pinned here so the
-   * limitation is visible and cannot regress further. See MIGRATION.md.
+   * The pair that used to fail, kept as its own case.
+   *
+   * muted on surface-5 was the worst combination in the system at 4.13, and
+   * every other pair passes by a wide margin, so a regression here would be
+   * the first sign the ramp has drifted. Asserted with headroom, because
+   * landing exactly on 4.5 is not a margin.
    */
-  it('records that muted text on surface-5 is the one pair below AA', () => {
-    expect(contrast(text.muted, surface[5])).toBeLessThan(4.5);
-    expect(contrast(text.muted, surface[5])).toBeGreaterThan(4);
-    expect(contrast(text.tertiary, surface[5])).toBeGreaterThanOrEqual(4.5);
+  it('keeps the tightest pair clear of AA rather than level with it', () => {
+    expect(contrast(text.muted, surface[5])).toBeGreaterThan(4.6);
+  });
+
+  /** Dimming has to stay legible as a step, not just as a number. */
+  it('keeps muted visibly dimmer than tertiary on the surface they share', () => {
+    expect(contrast(text.tertiary, surface[5]) - contrast(text.muted, surface[5])).toBeGreaterThan(
+      0.5,
+    );
   });
 
   it('clears AA for text sitting on an accent or status fill', () => {

@@ -43,13 +43,13 @@ is five names. The six values are authoritative, so the ramp is
 The export contained near-duplicates that were almost certainly drift, not
 intent. Each is snapped to its nearest ramp value.
 
-| Original  | Uses | Snapped to                 | Reason                                                      |
-| --------- | ---- | -------------------------- | ----------------------------------------------------------- |
-| `#101216` | 2    | `surface-2` `#121417`      | Within 2 per channel                                        |
-| `#17191E` | 4    | `surface-3` `#171A1F`      | Within 1 per channel                                        |
-| `#191C21` | 1    | `surface-4` `#1B1E23`      | Within 2 per channel                                        |
-| `#151013` | 1    | `accent-surface` `#1C1109` | Both are the selected-preset tint                           |
-| `#8B94A1` | 1    | `text-muted` `#7E8794`     | Nearer than `text-tertiary` (39 vs 44 summed channel delta) |
+| Original  | Uses | Snapped to                 | Reason                                                 |
+| --------- | ---- | -------------------------- | ------------------------------------------------------ |
+| `#101216` | 2    | `surface-2` `#121417`      | Within 2 per channel                                   |
+| `#17191E` | 4    | `surface-3` `#171A1F`      | Within 1 per channel                                   |
+| `#191C21` | 1    | `surface-4` `#1B1E23`      | Within 2 per channel                                   |
+| `#151013` | 1    | `accent-surface` `#1C1109` | Both are the selected-preset tint                      |
+| `#8B94A1` | 1    | `text-muted` `#88919D`     | Summed channel delta 10, after the contrast fix in 1.7 |
 
 ### 1.4 `#000000` kept as its own token
 
@@ -103,18 +103,33 @@ derived.
 Pristine's users are outdoors in daylight on mid-range Android. Every text and
 surface pair was measured against WCAG 2.1. Ratios for the text ramp:
 
-| Text             | s-0   | s-1   | s-2   | s-3   | s-4   | s-5      |
-| ---------------- | ----- | ----- | ----- | ----- | ----- | -------- |
-| `text-primary`   | 18.02 | 17.43 | 16.88 | 15.96 | 15.29 | 13.71    |
-| `text-secondary` | 12.18 | 11.78 | 11.41 | 10.79 | 10.34 | 9.27     |
-| `text-tertiary`  | 7.73  | 7.48  | 7.24  | 6.85  | 6.56  | 5.88     |
-| `text-muted`     | 5.42  | 5.24  | 5.08  | 4.80  | 4.60  | **4.13** |
+| Text             | s-0   | s-1   | s-2   | s-3   | s-4   | s-5   |
+| ---------------- | ----- | ----- | ----- | ----- | ----- | ----- |
+| `text-primary`   | 18.02 | 17.43 | 16.88 | 15.96 | 15.29 | 13.71 |
+| `text-secondary` | 12.18 | 11.78 | 11.41 | 10.79 | 10.34 | 9.27  |
+| `text-tertiary`  | 7.73  | 7.48  | 7.24  | 6.85  | 6.56  | 5.88  |
+| `text-muted`     | 6.17  | 5.97  | 5.78  | 5.47  | 5.24  | 4.70  |
 
-**One pair fails AA**: `text-muted` on `surface-5` at 4.13. It is left as-is
-rather than lightened, because moving `text-muted` would shift 59 use sites to
-fix one combination. The constraint is pinned by a test
-(`packages/tokens/src/tokens.test.ts`) so it is visible and cannot get worse.
-**Do not put muted text on `surface-5`.** Use `text-tertiary` there (5.88).
+**Every pair clears AA.** This was not true at first. The design's
+`text-muted` (`#7E8794`) reached only 4.13 on `surface-5`, and the original
+decision here was to leave it and write a rule saying not to pair them,
+because lightening the token touches all 59 of its use sites while only one
+combination is broken.
+
+That reasoning was wrong, and the rule is now gone. A token offered against
+six surfaces that fails on one of them is a trap: nothing in the type system
+stops the next screen from pairing them, the rule lives in a document rather
+than in the build, and the failure is invisible on a bright desk monitor and
+obvious outdoors, which is where these users are. The 59 sites were also not
+really a cost, since every one of them takes the value through
+`var(--pr-color-text-muted)`.
+
+`text-muted` moved to `#88919D`, 35 percent of the way towards
+`text-tertiary`. That is the smallest step clearing 4.5 with margin rather
+than landing on it, and it stays 1.19 below tertiary on `surface-5`, so the
+ramp still reads as four distinct steps. Two tests hold the line: one asserts
+AA across every text and surface pair, the other asserts the gap between
+tertiary and muted.
 
 `text-on-accent` (`#0A0B0D`) clears AA on all four accent and status fills
 (accent 6.31, error 5.76, warning 10.26, info 4.68).

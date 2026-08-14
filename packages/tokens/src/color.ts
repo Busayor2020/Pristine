@@ -34,7 +34,18 @@ export const text = {
   primary: '#F3F5F7',
   secondary: '#C6CCD4',
   tertiary: '#9BA3AE',
-  muted: '#7E8794',
+  /**
+   * Lightened from the design's #7E8794.
+   *
+   * That value cleared AA on surfaces 0 to 4 but reached only 4.13 on
+   * surface-5, the raised layer used by sheets and pressed rows. A token that
+   * fails on one of the surfaces it is offered against is a trap: nothing
+   * stops the next screen pairing them, and the failure is invisible until
+   * someone reads it outdoors. Moved 35 percent of the way towards tertiary,
+   * the least that clears 4.5 with margin (4.70) while staying a visible step
+   * dimmer than tertiary.
+   */
+  muted: '#88919D',
   /** For text and icons sitting on an accent or status fill. */
   onAccent: '#0A0B0D',
 } as const;
