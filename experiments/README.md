@@ -66,10 +66,36 @@ pnpm exp generate detail
 Nine arms, sized for one sitting. Each differs from the baseline in exactly one
 way, which is the only thing that makes the results readable.
 
-**4. Post them.** For each file in `candidates/`, in id order:
+**4. Move the candidates to the phone, byte for byte.**
+
+`generate` writes to a computer and Status is posted from a handset, so there
+is a transfer in the middle. Most ways of doing it re-encode the file, and a
+re-encoded input makes the whole run measure the wrong thing: the arm would be
+scored on damage that happened before WhatsApp ever saw it.
+
+Safe, because the bytes arrive unchanged:
+
+- USB cable, copying into the phone's `Download` or `DCIM` folder.
+- An SD card or a USB-C stick.
+- A cloud drive, downloading the file back as a file. Not "save to Photos".
+
+Not safe:
+
+- WhatsApp itself, including sending to your own number or to a saved
+  messages chat. It compresses on send, which is the very thing under test.
+- Google Photos, or any gallery sync set to anything but original quality.
+- Anything offering to "optimise", "resize" or "share a link" instead of
+  sending the file.
+
+Check one file after transferring: the size on the phone must match the size
+on disk exactly. If it does not, the transfer route re-encoded it, and every
+number from that run is void.
+
+**5. Post them.** For each file in `candidates/`, in id order:
 
 - Post it to your own Status. `.jpg` files go as photos, `.mp4` files as
-  videos. Do not let any other app touch the file first.
+  videos. Post from the file manager or gallery, not from inside another app's
+  share sheet.
 - Let it finish uploading.
 - Download it back from your own Status.
 - Save it into `returned/` with the two digit id as the prefix, for example
@@ -79,11 +105,16 @@ way, which is the only thing that makes the results readable.
 Keep conditions constant: one device, one account, one sitting, one app
 version. Note them in the results afterwards.
 
+If a file will not post at all, record which id and what the app did, then
+skip it and carry on. A partial run is scored and marked partial, which is
+worth more than a run abandoned halfway. Arm `07` is one second long and is
+the likeliest to be refused, since the Status trimmer has a floor.
+
 ```bash
 pnpm exp status
 ```
 
-**5. Record the conditions.**
+**6. Record the conditions.**
 
 ```bash
 cp conditions.example.json conditions.json
@@ -97,7 +128,7 @@ ffmpeg build is captured automatically.
 This is read at `compare` time, not at `generate` time, so filling it in after
 the posting pass and re-running `compare` attaches it.
 
-**6. Score it.**
+**7. Score it.**
 
 ```bash
 pnpm exp compare
@@ -106,7 +137,7 @@ pnpm exp compare
 Writes `results/<fixture>-<fit>.md` and refreshes `results.md`, which is the
 index over every run. Partial runs are fine and are marked as partial.
 
-**7. Put the run away before starting the next fixture.**
+**8. Put the run away before starting the next fixture.**
 
 ```bash
 pnpm exp archive
