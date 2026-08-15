@@ -42,6 +42,12 @@ Not a screenshot, not something that has already been through a messaging app,
 and at least 1080x1920. Anything smaller is rejected, because the reference
 render would upscale and quietly flatter every arm.
 
+The photograph has to arrive as the file the camera wrote. A copy that has
+been sent through a chat, posted anywhere, or pulled out of a gallery sync has
+already been re-encoded, and the run would then be measuring damage that
+happened before the experiment started. `pnpm exp serve` will take it off the
+phone unchanged.
+
 Fallback, so the harness runs today:
 
 ```bash
@@ -110,9 +116,15 @@ number from that run is void.
   share sheet.
 - Let it finish uploading.
 - Download it back from your own Status.
-- Save it into `returned/` with the two digit id as the prefix, for example
+- Get it into `returned/` with the two digit id as the prefix, for example
   `04-whatever-whatsapp-called-it.mp4`. Only the prefix is matched, so the rest
   of the name does not matter.
+
+The page `pnpm exp serve` is already showing carries the files back the other
+way too. Pick the returned files under "Send to returned/" and they land in
+the right directory, unchanged, without a cable. The same page will take a
+fixture photo straight off the phone into `fixtures/`, which is the easiest
+way to satisfy step 2 with a real photograph.
 
 Keep conditions constant: one device, one account, one sitting, one app
 version. Note them in the results afterwards.

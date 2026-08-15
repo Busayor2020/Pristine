@@ -2,7 +2,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { indexPage, lanAddress, listServable, resolveRequest, serve } from './serve.js';
+import {
+  indexPage,
+  lanAddress,
+  listServable,
+  resolveRequest,
+  resolveUpload,
+  serve,
+} from './serve.js';
 
 let dir: string;
 
@@ -102,6 +109,54 @@ describe('indexPage', () => {
     expect(page).toContain('href="/04-video-treatment.mp4"');
     expect(page).toContain('85,810 bytes');
   });
+
+  it('offers a way back for each upload destination', () => {
+    const page = indexPage([], ['returned', 'fixtures']);
+    expect(page).toContain('data-destination="returned"');
+    expect(page).toContain('data-destination="fixtures"');
+  });
+
+  it('offers no upload controls when none were configured', () => {
+    expect(indexPage([])).not.toContain('data-destination');
+  });
+});
+
+describe('resolveUpload', () => {
+  const uploads = { returned: '/tmp/returned', fixtures: '/tmp/fixtures' };
+
+  it('routes a file to the destination it names', () => {
+    expect(resolveUpload(uploads, '/upload/returned/04-back.mp4')).toEqual({
+      dir: '/tmp/returned',
+      file: path.resolve('/tmp/returned', '04-back.mp4'),
+    });
+  });
+
+  it('refuses a destination this run did not offer', () => {
+    expect(resolveUpload(uploads, '/upload/results/report.mp4')).toBe(null);
+    expect(resolveUpload(uploads, '/upload/../../etc/passwd.mp4')).toBe(null);
+  });
+
+  /** A path sent from the phone must not get to choose where the file lands. */
+  it('reduces a path to its basename', () => {
+    expect(resolveUpload(uploads, '/upload/returned/..%2F..%2Fevil.mp4')?.file).toBe(
+      path.resolve('/tmp/returned', 'evil.mp4'),
+    );
+    expect(resolveUpload(uploads, '/upload/returned/nested%2Fdeep%2F04.mp4')?.file).toBe(
+      path.resolve('/tmp/returned', '04.mp4'),
+    );
+  });
+
+  it('accepts only media, and nothing hidden', () => {
+    expect(resolveUpload(uploads, '/upload/returned/notes.txt')).toBe(null);
+    expect(resolveUpload(uploads, '/upload/returned/script.sh')).toBe(null);
+    expect(resolveUpload(uploads, '/upload/returned/.gitignore')).toBe(null);
+    expect(resolveUpload(uploads, '/upload/fixtures/photo.JPG')).not.toBe(null);
+  });
+
+  it('refuses a malformed upload path', () => {
+    expect(resolveUpload(uploads, '/upload/returned')).toBe(null);
+    expect(resolveUpload(uploads, '/04-video.mp4')).toBe(null);
+  });
 });
 
 describe('serve', () => {
@@ -130,6 +185,65 @@ describe('serve', () => {
       expect(response.status).toBe(404);
     } finally {
       await running.close();
+    }
+  });
+
+  it('takes a file back off the phone byte for byte', async () => {
+    const inbox = fs.mkdtempSync(path.join(os.tmpdir(), 'pristine-returned-'));
+    const running = await serve({
+      dir,
+      uploads: { returned: inbox },
+      port: 0,
+      host: '127.0.0.1',
+    });
+    try {
+      const port = new URL(running.url).port;
+      const payload = Buffer.from('what whatsapp handed back');
+      const response = await fetch(`http://127.0.0.1:${port}/upload/returned/04-back.mp4`, {
+        method: 'PUT',
+        body: payload,
+      });
+      expect(response.status).toBe(200);
+      expect(await response.text()).toContain('saved');
+      expect(fs.readFileSync(path.join(inbox, '04-back.mp4'))).toEqual(payload);
+    } finally {
+      await running.close();
+      fs.rmSync(inbox, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses an upload to a destination it was not given', async () => {
+    const inbox = fs.mkdtempSync(path.join(os.tmpdir(), 'pristine-returned-'));
+    const running = await serve({ dir, uploads: { returned: inbox }, port: 0, host: '127.0.0.1' });
+    try {
+      const port = new URL(running.url).port;
+      const response = await fetch(`http://127.0.0.1:${port}/upload/fixtures/sneaky.mp4`, {
+        method: 'PUT',
+        body: Buffer.from('no'),
+      });
+      expect(response.status).toBe(400);
+      expect(fs.existsSync(path.join(inbox, 'sneaky.mp4'))).toBe(false);
+    } finally {
+      await running.close();
+      fs.rmSync(inbox, { recursive: true, force: true });
+    }
+  });
+
+  /** A truncated file scored as a real return would poison the run silently. */
+  it('writes nothing at all for an empty upload', async () => {
+    const inbox = fs.mkdtempSync(path.join(os.tmpdir(), 'pristine-returned-'));
+    const running = await serve({ dir, uploads: { returned: inbox }, port: 0, host: '127.0.0.1' });
+    try {
+      const port = new URL(running.url).port;
+      const response = await fetch(`http://127.0.0.1:${port}/upload/returned/05-back.mp4`, {
+        method: 'PUT',
+        body: Buffer.alloc(0),
+      });
+      expect(response.status).toBe(400);
+      expect(fs.existsSync(path.join(inbox, '05-back.mp4'))).toBe(false);
+    } finally {
+      await running.close();
+      fs.rmSync(inbox, { recursive: true, force: true });
     }
   });
 });

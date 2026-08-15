@@ -23,9 +23,20 @@ import { color } from '@pristine/tokens';
 
 export interface ServeOptions {
   readonly dir: string;
+  /** Destination name to directory, for files coming back off the phone. */
+  readonly uploads?: Readonly<Record<string, string>>;
   readonly port: number;
   readonly host?: string;
 }
+
+/**
+ * Cap on a single upload.
+ *
+ * A returned Status video is small, and the largest candidate here is under
+ * 4 MB. This is not a security boundary, it is a stop on filling the disk if
+ * something points at this endpoint that should not.
+ */
+export const MAX_UPLOAD_BYTES = 64 * 1024 * 1024;
 
 export interface Served {
   readonly url: string;
@@ -86,6 +97,39 @@ export function resolveRequest(dir: string, url: string): string | null {
   return fs.existsSync(resolved) ? resolved : null;
 }
 
+const UPLOADABLE = ['.jpg', '.jpeg', '.png', '.mp4'];
+
+/**
+ * Where an upload should land, or null.
+ *
+ * The destination has to be one this run offered, and the name is reduced to
+ * its basename before anything else, so a path sent from the phone cannot
+ * decide where the file goes. Same reasoning as `resolveRequest`: this is
+ * listening on the network, so nothing arriving over it is trusted.
+ */
+export function resolveUpload(
+  uploads: Readonly<Record<string, string>>,
+  url: string,
+): { dir: string; file: string } | null {
+  // Split before decoding, not after. Decoding first would turn an encoded
+  // separator into a real one and change the shape of the path, which is the
+  // usual way this kind of check gets walked past.
+  const parts = (url.split('?')[0] ?? '').replace(/^\/+/, '').split('/');
+  if (parts.length !== 3 || parts[0] !== 'upload') return null;
+  const destination = decodeURIComponent(parts[1] ?? '');
+  const requested = decodeURIComponent(parts[2] ?? '');
+  const dir = uploads[destination];
+  if (dir === undefined) return null;
+
+  const name = path.basename(requested);
+  if (name === '' || name.startsWith('.')) return null;
+  if (!UPLOADABLE.includes(path.extname(name).toLowerCase())) return null;
+
+  const resolved = path.resolve(dir, name);
+  if (!resolved.startsWith(path.resolve(dir) + path.sep)) return null;
+  return { dir, file: resolved };
+}
+
 /**
  * The listing page. Deliberately plain: it is read once, on a phone.
  *
@@ -94,7 +138,7 @@ export function resolveRequest(dir: string, url: string): string | null {
  * Nothing else about this page is shared with the app, and it is not worth
  * making it so.
  */
-export function indexPage(files: readonly ServedFile[]): string {
+export function indexPage(files: readonly ServedFile[], uploads: readonly string[] = []): string {
   const rows = files
     .map(
       (file) =>
@@ -102,6 +146,17 @@ export function indexPage(files: readonly ServedFile[]): string {
         ` <span>${file.bytes.toLocaleString('en')} bytes</span></li>`,
     )
     .join('\n');
+
+  const sendBack = uploads
+    .map(
+      (destination) => `<section>
+<h2>Send to ${destination}/</h2>
+<input type="file" multiple data-destination="${destination}" accept=".jpg,.jpeg,.png,.mp4">
+<p class="log" id="log-${destination}"></p>
+</section>`,
+    )
+    .join('\n');
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -111,11 +166,15 @@ export function indexPage(files: readonly ServedFile[]): string {
 <style>
   body { font: 16px/1.6 system-ui, sans-serif; margin: 0; padding: 24px; background: ${color.surface[0]}; color: ${color.text.primary}; }
   h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 0 0 8px; }
   p { color: ${color.text.muted}; margin: 0 0 24px; }
   ul { list-style: none; padding: 0; margin: 0; }
   li { padding: 14px 0; border-bottom: 1px solid ${color.border.subtle}; display: flex; justify-content: space-between; gap: 12px; }
   a { color: ${color.accent.base}; text-decoration: none; font-weight: 600; }
   span { color: ${color.text.muted}; font-size: 13px; white-space: nowrap; }
+  section { margin-top: 32px; padding-top: 20px; border-top: 1px solid ${color.border.subtle}; }
+  input { width: 100%; }
+  .log { margin: 12px 0 0; font-size: 13px; white-space: pre-line; }
 </style>
 </head>
 <body>
@@ -124,22 +183,110 @@ export function indexPage(files: readonly ServedFile[]): string {
 <ul>
 ${rows}
 </ul>
+${sendBack}
+<script>
+for (const input of document.querySelectorAll('input[type=file]')) {
+  input.addEventListener('change', async () => {
+    const destination = input.dataset.destination;
+    const log = document.getElementById('log-' + destination);
+    for (const file of input.files) {
+      log.textContent += file.name + ' sending\\n';
+      try {
+        const response = await fetch('/upload/' + destination + '/' + encodeURIComponent(file.name), {
+          method: 'PUT',
+          body: file,
+        });
+        const body = await response.text();
+        log.textContent += '  ' + (response.ok ? body.trim() : 'failed: ' + body.trim()) + '\\n';
+      } catch (error) {
+        log.textContent += '  failed: ' + error + '\\n';
+      }
+    }
+    input.value = '';
+  });
+}
+</script>
 </body>
 </html>`;
+}
+
+/**
+ * Writes an upload to disk, or refuses it.
+ *
+ * Buffered rather than streamed straight to the destination, so a connection
+ * that drops halfway leaves nothing behind. A truncated file in `returned/`
+ * would be scored as a real return and would quietly poison the run, which is
+ * a worse outcome than a failed upload the user can see and retry.
+ */
+function receiveUpload(
+  request: http.IncomingMessage,
+  response: http.ServerResponse,
+  file: string,
+): void {
+  const chunks: Buffer[] = [];
+  let total = 0;
+  let refused = false;
+
+  request.on('data', (chunk: Buffer) => {
+    if (refused) return;
+    total += chunk.length;
+    if (total > MAX_UPLOAD_BYTES) {
+      refused = true;
+      response.writeHead(413, { 'content-type': 'text/plain' });
+      response.end('too large\n');
+      request.destroy();
+      return;
+    }
+    chunks.push(chunk);
+  });
+
+  request.on('error', () => {
+    if (refused) return;
+    refused = true;
+    response.writeHead(400, { 'content-type': 'text/plain' });
+    response.end('upload interrupted\n');
+  });
+
+  request.on('end', () => {
+    if (refused) return;
+    const body = Buffer.concat(chunks);
+    if (body.length === 0) {
+      response.writeHead(400, { 'content-type': 'text/plain' });
+      response.end('empty\n');
+      return;
+    }
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, body);
+    response.writeHead(200, { 'content-type': 'text/plain' });
+    response.end(`saved ${body.length.toLocaleString('en')} bytes\n`);
+  });
 }
 
 export function serve(options: ServeOptions): Promise<Served> {
   const files = listServable(options.dir);
 
+  const uploads = options.uploads ?? {};
+
   const server = http.createServer((request, response) => {
     const url = request.url ?? '/';
     if (url === '/' || url.startsWith('/?')) {
-      const body = indexPage(listServable(options.dir));
+      const body = indexPage(listServable(options.dir), Object.keys(uploads));
       response.writeHead(200, {
         'content-type': 'text/html; charset=utf-8',
         'content-length': Buffer.byteLength(body),
       });
       response.end(body);
+      return;
+    }
+
+    if (request.method === 'PUT') {
+      const target = resolveUpload(uploads, url);
+      if (target === null) {
+        response.writeHead(400, { 'content-type': 'text/plain' });
+        response.end('cannot accept that name or destination\n');
+        return;
+      }
+      receiveUpload(request, response, target.file);
       return;
     }
 

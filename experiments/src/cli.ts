@@ -183,20 +183,25 @@ const commands: Record<string, Command> = {
       return;
     }
 
-    const running = await serve({ dir: DIRS.candidates, port });
-    if (running.files.length === 0) {
-      console.error('Nothing to serve. Run generate first.');
-      await running.close();
-      process.exitCode = 1;
-      return;
-    }
+    const running = await serve({
+      dir: DIRS.candidates,
+      // The transfer runs both ways. Candidates go out to the phone, and the
+      // returned files, and a fixture photographed on that phone, come back.
+      uploads: { returned: DIRS.returned, fixtures: DIRS.fixtures },
+      port,
+    });
 
-    console.log(`\nServing ${running.files.length} candidates at\n`);
+    console.log(`\nServing at\n`);
     console.log(`  ${running.url}\n`);
-    console.log('Open that on the phone, on the same wifi, and save each file.');
-    console.log('The bytes are not touched in transit, which is the whole point:');
-    console.log('sending them through WhatsApp or a gallery sync would re-encode');
-    console.log('them and the run would measure the wrong thing.\n');
+    console.log('Open that on the phone, on the same wifi. Save each candidate,');
+    console.log('and send the returned files back from the same page. The bytes');
+    console.log('are not touched in either direction, which is the whole point:');
+    console.log('going through WhatsApp or a gallery sync would re-encode them');
+    console.log('and the run would measure the wrong thing.\n');
+    if (running.files.length === 0) {
+      console.log('  No candidates yet. Run generate first, or use this to send');
+      console.log('  a fixture photo across from the phone.\n');
+    }
     for (const file of running.files) {
       console.log(`  ${file.name.padEnd(28)} ${file.bytes.toLocaleString('en')} bytes`);
     }
