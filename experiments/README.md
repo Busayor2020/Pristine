@@ -210,3 +210,18 @@ see is not a product.
 If arm 04 loses to arm 02 across fixtures, the honest conclusion is that
 Pristine is a resize tool, and the photo-to-video technique should be dropped
 rather than defended.
+
+**Arm 01 against arm 02 is not a formality.** The premise behind the whole
+frame is written down in `packages/encoder/src/status.ts`: matching 1080x1920
+exactly avoids a resample on the sender's device, and it is marked "high
+confidence, unmeasured". Measured against that, the cost is large. A 12 MP
+phone photo keeps about 13 percent of its pixels when letterboxed into the
+frame, and about 7 percent if it was taken landscape. Cropping keeps 17
+percent and loses the sides.
+
+Someone looking at a prepared render next to the original will notice, and
+that reaction is evidence, not a complaint to explain away. If arm 01 beats
+arm 02, WhatsApp's own resize is better than ours and the app should send the
+photo untouched. The resampling itself has been checked and is not the
+variable: a single high quality `drawImage`, the browser's bitmap resizer, and
+stepped halving land within half a percent of each other on a detail chart.
