@@ -9,6 +9,7 @@ import {
   formatDuration,
   type LibraryItem,
 } from '@pristine/ui';
+import { saveBlob, preparedFilename } from './download.js';
 import { useNavigation } from './navigation.js';
 import { useIsDesktop } from './useMediaQuery.js';
 import { useMediaPicker } from './useMediaPicker.js';
@@ -192,11 +193,33 @@ export function App() {
    * quality without picking the file again, and pruned once the retention
    * window passes.
    */
+  /**
+   * Saves the prepared render to the device.
+   *
+   * What comes down today is the Status frame render, losslessly, because the
+   * encode is still faked and there is no video to hand over. Deliberately not
+   * re-encoded to something smaller on the way out: choosing a quality would
+   * be choosing an encoder parameter, and none of those land before the
+   * experiment says what they should be.
+   */
+  const saveRender = useCallback(() => {
+    const picked = picker.picked;
+    if (picked === undefined) return;
+    saveBlob(
+      picked.renderBlob,
+      preparedFilename(
+        picked.media.file.name,
+        picked.renderBlob.type,
+        en['export.save.filenamePrefix'],
+      ),
+    );
+  }, [picker.picked]);
+
   const keepResult = useCallback(async () => {
     const picked = picker.picked;
     if (picked === undefined || !isAvailable()) return;
     try {
-      const prepared = await (await fetch(picked.renderUrl)).blob();
+      const prepared = picked.renderBlob;
       await putItem({
         id: `${Date.now()}-${picked.media.file.name}`,
         name: picked.media.file.name,
@@ -329,6 +352,7 @@ export function App() {
               reset('library');
             }}
             onSaveToDevice={() => {
+              saveRender();
               void keepResult();
               reset('library');
             }}

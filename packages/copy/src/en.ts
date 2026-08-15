@@ -150,7 +150,18 @@ export const en = {
   // Was: "Nothing is re-encoded at all - but it lands in a chat, not on Status."
   'export.document.body': 'Nothing is re-encoded at all, but it lands in a chat, not on Status.',
   'export.save.title': 'Save to device',
-  'export.save.body': 'Keeps a copy in Pictures/Pristine. Post it whenever.',
+  // Was: "Keeps a copy in Pictures/Pristine. Post it whenever." A web app
+  // cannot choose the folder. It downloads, and where that lands is the
+  // browser's decision, so the copy no longer names a place it cannot reach.
+  'export.save.body': 'Downloads a copy. Post it whenever.',
+  /**
+   * Prefix for the saved file.
+   *
+   * Here rather than in the component for the same reason as every other
+   * string: it is user facing. It shows up in a downloads list, which is
+   * exactly where someone goes looking when they cannot find the file.
+   */
+  'export.save.filenamePrefix': 'pristine-',
 
   // Long video split
   'split.title': 'Too long for one post',

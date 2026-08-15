@@ -18,6 +18,14 @@ export interface PickedMedia {
   readonly media: AcceptedMedia;
   /** Object URL of the Status render at the current fit. */
   readonly renderUrl: string;
+  /**
+   * The render itself, for saving and for storing.
+   *
+   * Kept alongside the URL rather than fetched back out of it. Reading a blob
+   * URL to recover the blob works, but it is a request for something already
+   * in memory, and it fails silently once the URL has been revoked.
+   */
+  readonly renderBlob: Blob;
 }
 
 export interface MediaPicker {
@@ -97,6 +105,7 @@ export function useMediaPicker(fit: FitMode): MediaPicker {
       setPicked({
         media,
         renderUrl: url,
+        renderBlob: blob,
         chosen: {
           name: media.file.name,
           width: media.dimensions.width,
