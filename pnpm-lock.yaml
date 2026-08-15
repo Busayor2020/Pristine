@@ -84,6 +84,9 @@ importers:
       '@pristine/encoder':
         specifier: workspace:*
         version: link:../packages/encoder
+      '@pristine/tokens':
+        specifier: workspace:*
+        version: link:../packages/tokens
     devDependencies:
       '@types/node':
         specifier: ^22.10.2

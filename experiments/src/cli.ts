@@ -13,6 +13,7 @@
  *   doctor                  check this ffmpeg can do the job
  *   synth                   write the synthetic fixtures
  *   generate <fixture>      build candidates plus manifest
+ *   serve                   hand the candidates to the phone over wifi
  *   status                  what has been posted back so far
  *   compare                 score the returns and write results.md
  */
@@ -47,6 +48,7 @@ import {
   readRuns,
   reportName,
 } from './runs.js';
+import { serve } from './serve.js';
 
 const ROOT = path.resolve(fileURLToPath(import.meta.url), '../..');
 const DIRS = {
@@ -171,6 +173,40 @@ const commands: Record<string, Command> = {
     console.log('\nNext: post each one to Status, then download what comes back into');
     console.log('returned/, keeping the two digit id as the filename prefix.');
     console.log('See experiments/README.md for the protocol.');
+  },
+
+  async serve(args) {
+    const port = Number(args[0] ?? 8080);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      console.error('usage: serve [port]');
+      process.exitCode = 1;
+      return;
+    }
+
+    const running = await serve({ dir: DIRS.candidates, port });
+    if (running.files.length === 0) {
+      console.error('Nothing to serve. Run generate first.');
+      await running.close();
+      process.exitCode = 1;
+      return;
+    }
+
+    console.log(`\nServing ${running.files.length} candidates at\n`);
+    console.log(`  ${running.url}\n`);
+    console.log('Open that on the phone, on the same wifi, and save each file.');
+    console.log('The bytes are not touched in transit, which is the whole point:');
+    console.log('sending them through WhatsApp or a gallery sync would re-encode');
+    console.log('them and the run would measure the wrong thing.\n');
+    for (const file of running.files) {
+      console.log(`  ${file.name.padEnd(28)} ${file.bytes.toLocaleString('en')} bytes`);
+    }
+    console.log('\nCheck each saved file against the size above. Ctrl+C to stop.');
+
+    await new Promise<void>((resolve) => {
+      process.once('SIGINT', () => {
+        void running.close().then(resolve);
+      });
+    });
   },
 
   async status() {

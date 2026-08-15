@@ -73,7 +73,19 @@ is a transfer in the middle. Most ways of doing it re-encode the file, and a
 re-encoded input makes the whole run measure the wrong thing: the arm would be
 scored on damage that happened before WhatsApp ever saw it.
 
-Safe, because the bytes arrive unchanged:
+Easiest, and the reason this command exists:
+
+```bash
+pnpm exp serve
+```
+
+That prints a `http://192.168.x.x:8080/` address. Open it on the phone, on
+the same wifi, and save each file. A plain HTTP GET does not touch the bytes,
+every file is sent as an attachment so the browser saves it rather than
+decoding it into a player, and the page lists the byte count to check each
+download against. Stop it with Ctrl+C when the last file is down.
+
+Also safe, because the bytes arrive unchanged:
 
 - USB cable, copying into the phone's `Download` or `DCIM` folder.
 - An SD card or a USB-C stick.

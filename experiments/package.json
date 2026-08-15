@@ -9,7 +9,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@pristine/encoder": "workspace:*"
+    "@pristine/encoder": "workspace:*",
+    "@pristine/tokens": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
